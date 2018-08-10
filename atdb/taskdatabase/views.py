@@ -2,13 +2,10 @@ from django.http import HttpResponse
 from rest_framework import generics
 from django_filters import rest_framework as filters
 
-from .models import DataProduct
-from .serializers import DataProductSerializer
+from .models import DataProduct, Observation
+from .serializers import DataProductSerializer, ObservationSerializer
 
 from django.views.generic import ListView, DetailView
-
-def index_basic1(request):
-    return HttpResponse("Welcome to ATDB.")
 
 # http://localhost:8000/atdb/
 def index(request):
@@ -30,8 +27,9 @@ class DataProductFilter(filters.FilterSet):
         fields = {
             'type': ['exact', 'in'],  # ../dataproducts?dataProductType=IMAGE,VISIBILITY
             'description': ['exact', 'icontains'],
-            'taskId': ['exact', 'icontains'],
-            'creationTime': ['gt', 'lt', 'gte', 'lte', 'contains', 'exact']
+            'taskID': ['exact', 'icontains'],
+            'creationTime': ['gt', 'lt', 'gte', 'lte', 'contains', 'exact'],
+            'generatedByObservation__taskID': ['exact', 'in', 'icontains'],
         }
 
 
@@ -51,3 +49,34 @@ class DataProductDetailsView(generics.RetrieveUpdateDestroyAPIView):
     model = DataProduct
     queryset = DataProduct.objects.all()
     serializer_class = DataProductSerializer
+
+
+class ObservationFilter(filters.FilterSet):
+
+    class Meta:
+        model = Observation
+
+        fields = {
+            'process_type': ['exact', 'in'],
+            'name': ['exact', 'icontains'],
+            'taskID': ['exact', 'icontains'],
+            'creationTime': ['gt', 'lt', 'gte', 'lte', 'contains', 'exact']
+        }
+
+
+# ex: /atdb/observations/
+class ObservationListView(generics.ListCreateAPIView):
+    model = Observation
+    queryset = Observation.objects.all()
+    serializer_class = ObservationSerializer
+
+    # using the Django Filter Backend - https://django-filter.readthedocs.io/en/latest/index.html
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_class = ObservationFilter
+
+
+# ex: /atdb/observations/5/
+class ObservationDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    model = Observation
+    queryset = Observation.objects.all()
+    serializer_class = ObservationSerializer
