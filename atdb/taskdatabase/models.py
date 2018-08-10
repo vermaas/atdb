@@ -50,7 +50,7 @@ class StatusType(models.Model):
     object = models.CharField(max_length=20, choices=STATUS_TYPE_OBJECT_CHOICES, default="dataproduct")
 
     def __str__(self):
-         return str(self.object + '.' +self.name)
+         return str(self.id)+':'+str(self.object + '.' +self.name)
 
 
 class Status(models.Model):
@@ -59,6 +59,10 @@ class Status(models.Model):
 
     def __str__(self):
         return str(self.id)+':'+str(self.statusType)
+
+    @property
+    def derived_name(self):
+        return self.statusType.name
 
 
 class DataProduct(models.Model):
@@ -79,7 +83,7 @@ class DataProduct(models.Model):
     filename = models.CharField(max_length=200, default="unknown")
     description = models.CharField(max_length=255, default="unknown")
     type = models.CharField('type', choices=DATAPRODUCT_TYPE_CHOICES, default=TYPE_VISIBILITY, max_length=50)
-    taskID = models.CharField('runId', max_length=30, unique=True)
+    taskID = models.CharField('runId', max_length=30, blank=True, null=True)
 
     creationTime = models.DateTimeField(default=datetime.now, blank=True)
     size = models.BigIntegerField(default=0)
@@ -92,6 +96,9 @@ class DataProduct(models.Model):
     def __str__(self):
         return self.filename
 
+    @property
+    def current_status(self):
+        return self.status.statusType.name
 
 class Observation(models.Model):
 
@@ -110,7 +117,7 @@ class Observation(models.Model):
 
     name = models.CharField(max_length=100, default="unknown")
     process_type = models.CharField(max_length=50, default="observation")
-    taskID = models.CharField('runId', max_length=30, unique=True)
+    taskID = models.CharField('runId', max_length=30, unique=True, blank=True, null=True)
 
     creationTime = models.DateTimeField(default=datetime.now, blank=True)
 
@@ -121,3 +128,7 @@ class Observation(models.Model):
 
     def __str__(self):
         return str(self.taskID + ' - ' +self.name)
+
+    @property
+    def current_status(self):
+        return self.status.statusType.name

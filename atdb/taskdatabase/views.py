@@ -18,7 +18,6 @@ def detail(request, dataproduct_id):
 
 
 # --- class based views ---
-# ex: /atdb/dataproducts/
 class LocationListView(generics.ListCreateAPIView):
     model = Location
     queryset = Location.objects.all()
@@ -30,6 +29,17 @@ class LocationDetailsView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
 
+class StatusListView(generics.ListCreateAPIView):
+    model = Status
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+
+# ex: /atdb/dataproducts/5/
+class StatusDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    model = Status
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+    
 # ex: /atdb/dataproducts?status__in=created,archived
 class DataProductFilter(filters.FilterSet):
 
