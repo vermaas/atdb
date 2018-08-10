@@ -63,7 +63,8 @@ class DataProduct(models.Model):
         (TYPE_INSPECTIONPLOT, 'inspectionPlot'),
     )
 
-    name = models.CharField(max_length=200, default="unknown")
+    filename = models.CharField(max_length=200, default="unknown")
+    description = models.CharField(max_length=255, default="unknown")
     type = models.CharField('type', choices=DATAPRODUCT_TYPE_CHOICES, default=TYPE_VISIBILITY, max_length=50)
     taskId = models.CharField('runId', max_length=30, unique=True)
 
@@ -76,4 +77,4 @@ class DataProduct(models.Model):
     state_history = models.ForeignKey(DataProductStatus, related_name='state_history', null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
-        return self.name
+        return self.filename

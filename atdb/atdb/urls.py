@@ -19,4 +19,6 @@ from django.urls import include, path
 urlpatterns = [
     path('atdb/', include('taskdatabase.urls')),
     path('admin/', admin.site.urls),
+    # url(r'^api-auth/', include('rest_framework.urls')), # old DRF syntax
+    path('api-auth/', include('rest_framework.urls')),
 ]
