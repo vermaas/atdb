@@ -2,15 +2,15 @@ from django.http import HttpResponse
 from rest_framework import generics
 from django_filters import rest_framework as filters
 
-from .models import DataProduct, Observation
-from .serializers import DataProductSerializer, ObservationSerializer
+from .models import DataProduct, Observation, Location, Status
+from .serializers import DataProductSerializer, ObservationSerializer, LocationSerializer, StatusSerializer
 
 from django.views.generic import ListView, DetailView
 
 # http://localhost:8000/atdb/
 def index(request):
     latest_dataproducts_list = DataProduct.objects.order_by('-creationTime')[:5]
-    output = ', '.join([dp.taskId for dp in latest_dataproducts_list])
+    output = ', '.join([dp.taskID for dp in latest_dataproducts_list])
     return HttpResponse(output)
 
 def detail(request, dataproduct_id):
@@ -18,6 +18,18 @@ def detail(request, dataproduct_id):
 
 
 # --- class based views ---
+# ex: /atdb/dataproducts/
+class LocationListView(generics.ListCreateAPIView):
+    model = Location
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
+
+# ex: /atdb/dataproducts/5/
+class LocationDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    model = Location
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
+
 # ex: /atdb/dataproducts?status__in=created,archived
 class DataProductFilter(filters.FilterSet):
 

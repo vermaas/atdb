@@ -34,7 +34,7 @@ class Location(models.Model):
 
 class StatusType(models.Model):
 
-    DATAPRODUCT_STATUS_CHOICES = (
+    STATUS_TYPE_NAME_CHOICES = (
         (STATUS_UNKNOWN, 'unknown'),
         (STATUS_DEFINED, 'defined'),
         (STATUS_CREATED, 'created'),
@@ -44,36 +44,21 @@ class StatusType(models.Model):
         (STATUS_SECURED, 'secured'),
         (STATUS_REMOVED, 'removed'),
     )
-    name = models.CharField(max_length=20, choices=DATAPRODUCT_STATUS_CHOICES, default="unknown")
-    object = models.CharField(max_length=20, choices=DATAPRODUCT_STATUS_CHOICES, default="dataproduct")
+    STATUS_TYPE_OBJECT_CHOICES = (('observation','observation'),('dataproduct','dataproduct'))
+
+    name = models.CharField(max_length=20, choices=STATUS_TYPE_NAME_CHOICES, default="unknown")
+    object = models.CharField(max_length=20, choices=STATUS_TYPE_OBJECT_CHOICES, default="dataproduct")
 
     def __str__(self):
          return str(self.object + '.' +self.name)
 
-class DataProductStatus(models.Model):
-
-    DATAPRODUCT_STATUS_CHOICES = (
-        (STATUS_UNKNOWN, 'unknown'),
-        (STATUS_DEFINED, 'defined'),
-        (STATUS_CREATED, 'created'),
-        (STATUS_VALID, 'valid'),
-        (STATUS_COPIED, 'copied'),
-        (STATUS_ARCHIVED, 'archived'),
-        (STATUS_SECURED, 'secured'),
-        (STATUS_REMOVED, 'removed'),
-    )
-    status = models.CharField(max_length=20, choices=DATAPRODUCT_STATUS_CHOICES, default="unknown")
-    timestamp = models.DateTimeField('Timestamp of creation in the database.', default=datetime.now, blank=True)
-
-    def __str__(self):
-        return self.status
 
 class Status(models.Model):
     statusType = models.ForeignKey(StatusType, null=True, on_delete=models.SET_NULL)
     timestamp = models.DateTimeField('Timestamp of creation in the database.', default=datetime.now, blank=True)
 
     def __str__(self):
-        return str(self.statusType)
+        return str(self.id)+':'+str(self.statusType)
 
 
 class DataProduct(models.Model):
@@ -100,9 +85,9 @@ class DataProduct(models.Model):
     size = models.BigIntegerField(default=0)
     quality = models.CharField(max_length=30, default="unknown")
 
-    location = models.ForeignKey(Location, null=True, on_delete=models.SET_NULL)
+    locations = models.ManyToManyField(Location, related_name='dataproduct_location', blank=True)
     status = models.ForeignKey(Status, null=True, on_delete=models.SET_NULL)
-    statusHistory = models.ForeignKey(Status, related_name='dataproduct_status_history', null=True, on_delete=models.SET_NULL)
+    statusHistory = models.ManyToManyField(Status, related_name='dataproduct_status_history', blank=True)
 
     def __str__(self):
         return self.filename
@@ -129,9 +114,9 @@ class Observation(models.Model):
 
     creationTime = models.DateTimeField(default=datetime.now, blank=True)
 
-    location = models.ForeignKey(Location, null=True, on_delete=models.SET_NULL)
+    locations = models.ManyToManyField(Location, related_name='observation_location', blank=True)
     status = models.ForeignKey(Status, null=True, on_delete=models.SET_NULL)
-    statusHistory = models.ForeignKey(Status, related_name='observation_status_history', null=True, on_delete=models.SET_NULL)
+    statusHistory = models.ManyToManyField(Status, related_name='observation_status_history', null=True)
     generatedDataProducts = models.ManyToManyField(DataProduct, related_name='generatedByObservation', blank=True)
 
     def __str__(self):
