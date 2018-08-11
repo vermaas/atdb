@@ -1,0 +1,33 @@
+TD {
+  font-family: Raleway;
+  font-size: 12pt;
+}
+
+.defined> {
+  color: darkgray;
+}
+.created {
+  color: blue;
+}
+.valid> {
+  background-color: lemonchiffon;
+  color: green;
+}
+.copied> {
+  color: black;
+}
+.archived> {
+  color: black;
+}
+.secured> {
+  color: black;
+}
+.removed> {
+  color: darkgray;
+}
+
+p.title {
+	font-family: Raleway;
+	font-size: 18pt;
+}
+

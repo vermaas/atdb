@@ -1,0 +1,130 @@
+[
+{
+    "model": "taskdatabase.statustype",
+    "pk": 1,
+    "fields": {
+        "name": "unknown",
+        "object": "dataproduct"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 2,
+    "fields": {
+        "name": "defined",
+        "object": "dataproduct"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 3,
+    "fields": {
+        "name": "created",
+        "object": "dataproduct"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 4,
+    "fields": {
+        "name": "valid",
+        "object": "dataproduct"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 5,
+    "fields": {
+        "name": "copied",
+        "object": "dataproduct"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 6,
+    "fields": {
+        "name": "archived",
+        "object": "dataproduct"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 7,
+    "fields": {
+        "name": "secured",
+        "object": "dataproduct"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 8,
+    "fields": {
+        "name": "removed",
+        "object": "dataproduct"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 9,
+    "fields": {
+        "name": "unknown",
+        "object": "observation"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 10,
+    "fields": {
+        "name": "defined",
+        "object": "observation"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 11,
+    "fields": {
+        "name": "created",
+        "object": "observation"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 12,
+    "fields": {
+        "name": "valid",
+        "object": "observation"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 13,
+    "fields": {
+        "name": "copied",
+        "object": "observation"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 14,
+    "fields": {
+        "name": "archived",
+        "object": "observation"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 15,
+    "fields": {
+        "name": "secured",
+        "object": "observation"
+    }
+},
+{
+    "model": "taskdatabase.statustype",
+    "pk": 16,
+    "fields": {
+        "name": "removed",
+        "object": "observation"
+    }
+}
+]

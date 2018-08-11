@@ -100,6 +100,7 @@ class DataProduct(models.Model):
     def current_status(self):
         return self.status.statusType.name
 
+
 class Observation(models.Model):
 
     DATAPRODUCT_TYPE_CHOICES = (

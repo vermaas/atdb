@@ -1,6 +1,8 @@
 from django.http import HttpResponse
 from rest_framework import generics
 from django_filters import rest_framework as filters
+from django.template import loader
+from django.shortcuts import render
 
 from .models import DataProduct, Observation, Location, Status
 from .serializers import DataProductSerializer, ObservationSerializer, LocationSerializer, StatusSerializer
@@ -9,9 +11,14 @@ from django.views.generic import ListView, DetailView
 
 # http://localhost:8000/atdb/
 def index(request):
-    latest_dataproducts_list = DataProduct.objects.order_by('-creationTime')[:5]
-    output = ', '.join([dp.taskID for dp in latest_dataproducts_list])
-    return HttpResponse(output)
+    latest_observations_list = Observation.objects.order_by('-creationTime')[:10]
+    latest_dataproducts_list = DataProduct.objects.order_by('-creationTime')[:10]
+    context = {
+        'latest_observations_list': latest_observations_list,
+        'latest_dataproducts_list': latest_dataproducts_list
+        }
+    return render(request, 'taskdatabase/index.html', context)
+
 
 def detail(request, dataproduct_id):
     return HttpResponse("You're looking at dataproduct %s." % dataproduct_id)
