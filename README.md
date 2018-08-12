@@ -14,14 +14,9 @@ Initially 'RAD-ing' away to get above the clouds and get a working prototype.
   <img src="https://github.com/vermaas/atdb/blob/master/docs/apertif_taskdatabase_django_option.png"/>
 </p>
 
-Datamodel
+Data Model
 -
 https://www.draw.io/#G1agZN26g1yIhb86I2w-N68riAYLV_1siw
-
-<html>
-<div class="mxgraph" style="max-width:100%;border:1px solid transparent;" data-mxgraph="{&quot;highlight&quot;:&quot;#0000ff&quot;,&quot;nav&quot;:true,&quot;resize&quot;:true,&quot;toolbar&quot;:&quot;zoom layers lightbox&quot;,&quot;edit&quot;:&quot;_blank&quot;,&quot;url&quot;:&quot;https://drive.google.com/uc?id=1agZN26g1yIhb86I2w-N68riAYLV_1siw&amp;export=download&quot;}"></div>
-<script type="text/javascript" src="https://www.draw.io/embed2.js?&fetch=https%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1agZN26g1yIhb86I2w-N68riAYLV_1siw%26export%3Ddownload"></script>
-</html>
 
 Documents
 -
