@@ -14,9 +14,13 @@ Initially 'RAD-ing' away to get above the clouds and get a working prototype.
   <img src="https://github.com/vermaas/atdb/blob/master/docs/apertif_taskdatabase_django_option.png"/>
 </p>
 
-Data Model
+Datamodel
 -
-https://www.draw.io/#G1agZN26g1yIhb86I2w-N68riAYLV_1siw
+<p align="center">
+<ul>
+<li><a href="https://www.draw.io/#G1agZN26g1yIhb86I2w-N68riAYLV_1siw"/>Current Datamodel (maintained)</a></li>
+</ul>
+</p>
 
 Documents
 -
