@@ -1,3 +1,4 @@
+import logging
 from django.http import HttpResponse
 from rest_framework import generics
 from django_filters import rest_framework as filters
@@ -7,12 +8,15 @@ from django.shortcuts import render
 from .models import DataProduct, Observation, Location, Status
 from .serializers import DataProductSerializer, ObservationSerializer, LocationSerializer, StatusSerializer
 
-from django.views.generic import ListView, DetailView
+datetime_format_string = '%Y-%m-%dT%H:%M:%SZ'
+
+logger = logging.getLogger(__name__)
 
 # http://localhost:8000/atdb/
 def index(request):
-    latest_observations_list = Observation.objects.order_by('-creationTime')[:10]
-    latest_dataproducts_list = DataProduct.objects.order_by('-creationTime')[:10]
+
+    latest_observations_list = Observation.objects.order_by('-creationTime')[:50]
+    latest_dataproducts_list = DataProduct.objects.order_by('-creationTime')[:50]
     context = {
         'latest_observations_list': latest_observations_list,
         'latest_dataproducts_list': latest_dataproducts_list

@@ -124,7 +124,7 @@ class Observation(models.Model):
 
     locations = models.ManyToManyField(Location, related_name='observation_location', blank=True)
     status = models.ForeignKey(Status, null=True, on_delete=models.SET_NULL)
-    statusHistory = models.ManyToManyField(Status, related_name='observation_status_history', null=True)
+    statusHistory = models.ManyToManyField(Status, related_name='observation_status_history', blank=True)
     generatedDataProducts = models.ManyToManyField(DataProduct, related_name='generatedByObservation', blank=True)
 
     def __str__(self):

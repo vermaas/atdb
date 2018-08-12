@@ -6,23 +6,25 @@ TD {
 .defined> {
   color: darkgray;
 }
+
 .created {
   color: blue;
 }
-.valid> {
+
+.valid {
   background-color: lemonchiffon;
   color: green;
 }
-.copied> {
+.copied {
   color: black;
 }
-.archived> {
+.archived {
   color: black;
 }
-.secured> {
+.secured {
   color: black;
 }
-.removed> {
+.removed {
   color: darkgray;
 }
 

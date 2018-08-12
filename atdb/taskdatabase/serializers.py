@@ -51,11 +51,12 @@ class DataProductSerializer(serializers.ModelSerializer):
         view_name='status-detail-view',
         required=True)
 
-    statusHistory = serializers.SlugRelatedField(
+    statusHistory = serializers.HyperlinkedRelatedField(
         label='History',
         many=True,
         queryset = Status.objects.all(),
-        slug_field='derived_name',
+        view_name='status-detail-view',
+        # slug_field='derived_name',
         required=True)
 
     #status = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -88,11 +89,12 @@ class ObservationSerializer(serializers.ModelSerializer):
         view_name='status-detail-view',
         required=True)
 
-    statusHistory = serializers.SlugRelatedField(
+    statusHistory = serializers.HyperlinkedRelatedField(
         label='History',
         many=True,
         queryset = Status.objects.all(),
-        slug_field='derived_name',
+        view_name='status-detail-view',
+        #slug_field='derived_name',
         required=True)
 
     class Meta:
