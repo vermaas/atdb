@@ -16,7 +16,7 @@ urlpatterns = [
     path('observations/', views.ObservationListView.as_view()),
 
     # ex: /atdb/observations/5/
-    path('observations/<int:pk>/', views.ObservationDetailsView.as_view()),
+    path('observations/<int:pk>/', views.ObservationDetailsView.as_view(),name='observation-detail-view'),
 
     path('locations/', views.LocationListView.as_view()),
     path('locations/<int:pk>/', views.LocationDetailsView.as_view(),name='location-detail-view'),

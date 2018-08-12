@@ -13,7 +13,7 @@ class LocationSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = Location
-        fields = ('id','host','path','timestamp')
+        fields = ('id','location','timestamp')
 
 
 class StatusTypeSerializer(serializers.ModelSerializer):
@@ -32,6 +32,16 @@ class StatusSerializer(serializers.ModelSerializer):
 
 
 class DataProductSerializer(serializers.ModelSerializer):
+    # this adds a 'parent_observation' list with hyperlinks to the DataProduct API.
+    # note that 'generatedByObservation' is not defined in the DataProduct model, but in the Observation model.
+    generatedByObservation = serializers.HyperlinkedRelatedField(
+        many=True,
+        # read_only=True,
+        queryset=Observation.objects.all(),
+        view_name='observation-detail-view',
+        required=False,
+        lookup_field='pk'
+    )
 
     locations = serializers.HyperlinkedRelatedField(
         label='Locations',
@@ -39,7 +49,7 @@ class DataProductSerializer(serializers.ModelSerializer):
         queryset = Location.objects.all(),
         view_name='location-detail-view',
         lookup_field='pk',
-        required=True)
+        required=False)
 
 #    locations = LocationSerializer(
 #         many=True,
@@ -49,7 +59,7 @@ class DataProductSerializer(serializers.ModelSerializer):
         many=False,
         queryset = Status.objects.all(),
         view_name='status-detail-view',
-        required=True)
+        required=False)
 
     statusHistory = serializers.HyperlinkedRelatedField(
         label='History',
@@ -57,13 +67,13 @@ class DataProductSerializer(serializers.ModelSerializer):
         queryset = Status.objects.all(),
         view_name='status-detail-view',
         # slug_field='derived_name',
-        required=True)
+        required=False)
 
     #status = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
         model = DataProduct
         fields = ('id','filename','description','type','taskID','creationTime','size','quality',
-                  'locations','status','current_status','statusHistory')
+                  'current_location','locations','status','current_status','statusHistory','generatedByObservation')
 
 
 class ObservationSerializer(serializers.ModelSerializer):
@@ -100,4 +110,4 @@ class ObservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Observation
         fields = ('id', 'name', 'process_type','taskID','creationTime',
-                  'generatedDataProducts','locations','status','current_status','statusHistory')
+                  'current_location','locations','status','current_status','statusHistory','generatedDataProducts')
