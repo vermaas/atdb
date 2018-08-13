@@ -90,8 +90,8 @@ class DataProduct(models.Model):
     creationTime = models.DateTimeField(default=datetime.now, blank=True)
     size = models.BigIntegerField(default=0)
     quality = models.CharField(max_length=30, default="unknown")
-
-    current_location = models.CharField(max_length=255, default="unknown")
+    new_status = models.CharField(max_length=20, default="defined")
+    new_location = models.CharField(max_length=255, default="unknown")
     locations = models.ManyToManyField(Location, related_name='dataproduct_location', blank=True)
     status = models.ForeignKey(Status, related_name='dataproduct_status', null=True, on_delete=models.SET_NULL)
     statusHistory = models.ManyToManyField(Status, related_name='dataproduct_status_history', blank=True)
@@ -100,8 +100,11 @@ class DataProduct(models.Model):
         return self.filename
 
     @property
-    def current_status(self):
-        return self.status.statusType.name
+    def derived_status(self):
+        try:
+            return self.status.statusType.name
+        except:
+            return None
 
 
 class Observation(models.Model):
@@ -125,7 +128,8 @@ class Observation(models.Model):
 
     creationTime = models.DateTimeField(default=datetime.now, blank=True)
 
-    current_location = models.CharField(max_length=255, default="unknown")
+    new_location = models.CharField(max_length=255, default="unknown")
+    new_status = models.CharField(max_length=20, default="defined")
     locations = models.ManyToManyField(Location, related_name='observation_location', blank=True)
     status = models.ForeignKey(Status, related_name='observation_status',null=True, on_delete=models.SET_NULL)
     statusHistory = models.ManyToManyField(Status, related_name='observation_status_history', blank=True)
@@ -135,5 +139,8 @@ class Observation(models.Model):
         return str(self.taskID + ' - ' +self.name)
 
     @property
-    def current_status(self):
-        return self.status.statusType.name
+    def derived_status(self):
+        try:
+            return self.status.statusType.name
+        except:
+            return None

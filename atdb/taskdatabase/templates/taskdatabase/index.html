@@ -23,15 +23,15 @@
                     </thead>
                     <tbody>
                     {% for observation in latest_observations_list %}
-                    {% if observation.current_status != "removed" %}
+                    {% if observation.derived_status != "removed" %}
 
                     <div class="row">
-                        <tr class="{{ observation.current_status }}">
+                        <tr class="{{ observation.derived_status }}">
                             <td><a href="/atdb/observations/{{ observation.id }}/">{{ observation.taskID }}</a> </td>
                             <td>{{ observation.process_type }} </td>
                             <td>{{ observation.name }} </td>
                             <td>{{ observation.creationTime }} </td>
-                            <td>{{ observation.current_status }}</td>
+                            <td>{{ observation.derived_status }}</td>
                         </tr>
                     </div>
                     {% endif %}
@@ -63,15 +63,15 @@
                     </thead>
                     <tbody>
                         {% for dataproduct in latest_dataproducts_list %}
-                            {% if dataproduct.current_status != "removed" %}
+                            {% if dataproduct.derived_status != "removed" %}
 
                                 <div class="row">
-                                   <tr class="{{ dataproduct.current_status }}">
+                                   <tr class="{{ dataproduct.derived_status }}">
                                        <td><a href="/atdb/dataproducts/{{ dataproduct.id }}/">{{ dataproduct.taskID }}</a> </td>
                                        <td>{{ dataproduct.type }} </td>
                                        <td>{{ dataproduct.filename }} </td>
                                        <td>{{ dataproduct.creationTime }} </td>
-                                       <td>{{ dataproduct.current_status }}</td>
+                                       <td>{{ dataproduct.derived_status }}</td>
                                     </tr>
                                 </div>
                             {% endif %}

@@ -27,6 +27,24 @@ def request_finished_handler(sender, **kwargs):
 
 #--- DataProduct signals-------------
 
+@receiver(pre_save, sender=DataProduct)
+def pre_save_dataproduct_handler(sender, **kwargs):
+    """
+    intercept the object before it is saved. To check if a status change is requested
+    :param (in) sender: The model class that sends the trigger
+    :param (in) kwargs: The instance of the object that sends the trigger.
+    """
+    logger.info("SIGNAL : pre_save_dataproduct_handler(" + str(kwargs.get('instance')) + ")")
+    myDataProduct = kwargs.get('instance')
+    current_status = str(myDataProduct.derived_status)
+    logger.info('current_status = '+current_status)
+    new_status = myDataProduct.new_status
+    logger.info('new_status = ' + new_status)
+
+    if (new_status!=None) and (current_status!=new_status):
+        logger.info('status change detected: ' + current_status + ' => ' + new_status + ' for ' + myDataProduct.filename)
+        dispatchJob(myDataProduct,new_status)
+
 
 @receiver(post_save, sender=DataProduct)
 def post_save_dataproduct_handler(sender, **kwargs):
@@ -43,11 +61,11 @@ def post_save_dataproduct_handler(sender, **kwargs):
         logger.info("save new dataproduct")
 
         # create new location, use as default the 'current_location' that is provided in the http request
-        myLocation = Location(location=myDataProduct.current_location)
+        myLocation = Location(location=myDataProduct.new_location)
         myLocation.save()
 
         # set default status 'defined'
-        myStatusType = StatusType.objects.get(name='defined', object='dataproduct')
+        myStatusType = StatusType.objects.get(name=myDataProduct.new_status, object='dataproduct')
         myStatus = Status(statusType=myStatusType)
 
         # this save will trigger a signal that a status has changed...
@@ -67,20 +85,6 @@ def post_save_dataproduct_handler(sender, **kwargs):
         post_save.connect(post_save_dataproduct_handler, sender=sender)
 
 
-@receiver(post_save, sender=Status)
-def post_save_status_handler(sender, **kwargs):
-    """
-    intercept status changes
-    :param (in) sender: The model class that sends the trigger
-    :param (in) kwargs: The instance of the object that sends the trigger.
-    """
-    logger.info("SIGNAL : post_save_status_handler("+str(kwargs.get('instance'))+")")
-    myStatus = kwargs.get('instance')
 
-    logger.info('status change detected: '+myStatus.derived_name+' for '+myStatus.derived_object)
-    dispatchJob(myStatus.derived_object,myStatus.derived_name)
-
-
-def dispatchJob(object, status):
-    if object == 'dataproduct':
-        logger.info("*** dispatchJob(" + str(object) + "," + str(status) + ") ***")
+def dispatchJob(myObject, status):
+    logger.info("*** dispatchJob(" + str(myObject) + "," + str(status) + ") ***")

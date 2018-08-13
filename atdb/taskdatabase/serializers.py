@@ -73,7 +73,8 @@ class DataProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataProduct
         fields = ('id','filename','description','type','taskID','creationTime','size','quality',
-                  'current_location','locations','status','current_status','statusHistory','generatedByObservation')
+                  'locations','status','derived_status','statusHistory','generatedByObservation',
+                  'new_location', 'new_status')
 
 
 class ObservationSerializer(serializers.ModelSerializer):
@@ -110,4 +111,4 @@ class ObservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Observation
         fields = ('id', 'name', 'process_type','taskID','creationTime',
-                  'current_location','locations','status','current_status','statusHistory','generatedDataProducts')
+                  'new_location','new_status','locations','status','derived_status','statusHistory','generatedDataProducts')
