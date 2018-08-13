@@ -20,6 +20,9 @@ urlpatterns = [
 
     path('locations/', views.LocationListView.as_view()),
     path('locations/<int:pk>/', views.LocationDetailsView.as_view(),name='location-detail-view'),
+
     path('status/', views.StatusListView.as_view()),
     path('status/<int:pk>/', views.StatusDetailsView.as_view(), name='status-detail-view'),
+    path('statustype/', views.StatusTypeListView.as_view()),
+    path('statustype/<int:pk>/', views.StatusTypeDetailsView.as_view(), name='statustype-detail-view'),
 ]

@@ -24,10 +24,15 @@ class StatusTypeSerializer(serializers.ModelSerializer):
 
 
 class StatusSerializer(serializers.ModelSerializer):
+    statusType = serializers.HyperlinkedRelatedField(
+        many=False,
+        queryset = StatusType.objects.all(),
+        view_name='statustype-detail-view',
+        required=True)
 
     class Meta:
         model = Status
-        fields = '__all__'
+        fields = ('id','timestamp','statusType')
 
 
 
@@ -72,7 +77,8 @@ class DataProductSerializer(serializers.ModelSerializer):
     #status = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
         model = DataProduct
-        fields = ('id','filename','description','type','taskID','creationTime','size','quality',
+        fields = ('id','task_type','name','filename','description','dataproduct_type',
+                  'taskID','creationTime','size','quality',
                   'locations','status','derived_status','statusHistory','generatedByObservation',
                   'new_location', 'new_status')
 
@@ -84,7 +90,7 @@ class ObservationSerializer(serializers.ModelSerializer):
         queryset = DataProduct.objects.all(),
         view_name='dataproduct-detail-view',
         lookup_field='pk',
-        required=True)
+        required=False)
 
     locations = serializers.HyperlinkedRelatedField(
         label='Locations',
@@ -92,13 +98,13 @@ class ObservationSerializer(serializers.ModelSerializer):
         queryset = Location.objects.all(),
         view_name='location-detail-view',
         lookup_field='pk',
-        required=True)
+        required=False)
 
     status = serializers.HyperlinkedRelatedField(
         many=False,
         queryset = Status.objects.all(),
         view_name='status-detail-view',
-        required=True)
+        required=False)
 
     statusHistory = serializers.HyperlinkedRelatedField(
         label='History',
@@ -106,9 +112,9 @@ class ObservationSerializer(serializers.ModelSerializer):
         queryset = Status.objects.all(),
         view_name='status-detail-view',
         #slug_field='derived_name',
-        required=True)
+        required=False)
 
     class Meta:
         model = Observation
-        fields = ('id', 'name', 'process_type','taskID','creationTime',
+        fields = ('id','task_type', 'name', 'process_type','taskID','creationTime',
                   'new_location','new_status','locations','status','derived_status','statusHistory','generatedDataProducts')

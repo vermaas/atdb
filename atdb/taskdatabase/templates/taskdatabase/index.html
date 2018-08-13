@@ -27,7 +27,7 @@
 
                     <div class="row">
                         <tr class="{{ observation.derived_status }}">
-                            <td><a href="/atdb/observations/{{ observation.id }}/">{{ observation.taskID }}</a> </td>
+                            <td><a href="/atdb/observations/{{ observation.id }}/" target="_blank">{{ observation.taskID }} </a> </td>
                             <td>{{ observation.process_type }} </td>
                             <td>{{ observation.name }} </td>
                             <td>{{ observation.creationTime }} </td>
@@ -39,7 +39,7 @@
                     </tbody>
                 </table>
                 {% else %}
-                <p>No dataproducts are available.</p>
+                <p>No recent Observations.</p>
                 {% endif %}
 
             </div>
@@ -56,7 +56,7 @@
                     <tr>
                         <th>TaskID</th>
                         <th>Type</th>
-                        <th>Filename</th>
+                        <th>Name</th>
                         <th>Timestamp</th>
                         <th>Status</th>
                     </tr>
@@ -67,9 +67,9 @@
 
                                 <div class="row">
                                    <tr class="{{ dataproduct.derived_status }}">
-                                       <td><a href="/atdb/dataproducts/{{ dataproduct.id }}/">{{ dataproduct.taskID }}</a> </td>
-                                       <td>{{ dataproduct.type }} </td>
-                                       <td>{{ dataproduct.filename }} </td>
+                                       <td><a href="/atdb/dataproducts/{{ dataproduct.id }}/" target="_blank">{{ dataproduct.taskID }}</a> </td>
+                                       <td>{{ dataproduct.dataproduct_type }} </td>
+                                       <td>{{ dataproduct.name }} </td>
                                        <td>{{ dataproduct.creationTime }} </td>
                                        <td>{{ dataproduct.derived_status }}</td>
                                     </tr>
@@ -79,7 +79,7 @@
                     </tbody>
                 </table>
             {% else %}
-                <p>No dataproducts are available.</p>
+                <p>No recent dataproducts.</p>
             {% endif %}
             </div>
         </div>

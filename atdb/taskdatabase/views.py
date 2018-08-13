@@ -5,8 +5,8 @@ from django_filters import rest_framework as filters
 from django.template import loader
 from django.shortcuts import render
 
-from .models import DataProduct, Observation, Location, Status
-from .serializers import DataProductSerializer, ObservationSerializer, LocationSerializer, StatusSerializer
+from .models import DataProduct, Observation, Location, Status, StatusType
+from .serializers import DataProductSerializer, ObservationSerializer, LocationSerializer, StatusSerializer, StatusTypeSerializer
 
 datetime_format_string = '%Y-%m-%dT%H:%M:%SZ'
 
@@ -45,12 +45,21 @@ class StatusListView(generics.ListCreateAPIView):
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
 
-# ex: /atdb/dataproducts/5/
 class StatusDetailsView(generics.RetrieveUpdateDestroyAPIView):
     model = Status
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
-    
+
+class StatusTypeListView(generics.ListCreateAPIView):
+    model = StatusType
+    queryset = StatusType.objects.all()
+    serializer_class = StatusTypeSerializer
+
+class StatusTypeDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    model = StatusType
+    queryset = StatusType.objects.all()
+    serializer_class = StatusTypeSerializer
+
 # ex: /atdb/dataproducts?status__in=created,archived
 class DataProductFilter(filters.FilterSet):
 
@@ -58,7 +67,7 @@ class DataProductFilter(filters.FilterSet):
         model = DataProduct
 
         fields = {
-            'type': ['exact', 'in'],  # ../dataproducts?dataProductType=IMAGE,VISIBILITY
+            'dataproduct_type': ['exact', 'in'],  # ../dataproducts?dataProductType=IMAGE,VISIBILITY
             'description': ['exact', 'icontains'],
             'taskID': ['exact', 'icontains'],
             'creationTime': ['gt', 'lt', 'gte', 'lte', 'contains', 'exact'],
