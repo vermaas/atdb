@@ -35,6 +35,11 @@ STATUS_TYPE_NAME_CHOICES = (
     (STATUS_SECURED, 'secured'),
     (STATUS_REMOVED, 'removed'))
 
+TASK_TYPE__CHOICES = (
+    (TASK_TYPE_OBSERVATION, TASK_TYPE_OBSERVATION),
+    (TASK_TYPE_DATAPRODUCT, TASK_TYPE_DATAPRODUCT)
+)
+
 class Location(models.Model):
     location = models.CharField(max_length=255, default="unknown",blank=True, null=True)
     timestamp = models.DateTimeField('Timestamp of creation in the database.', default=datetime.now, blank=True)
@@ -43,61 +48,38 @@ class Location(models.Model):
          return str(self.location)
 
 
-class StatusType(models.Model):
-
-    STATUS_TYPE_OBJECT_CHOICES = (('observation','observation'),('dataproduct','dataproduct'))
-
-    name = models.CharField(max_length=20, choices=STATUS_TYPE_NAME_CHOICES, default="unknown")
-    object = models.CharField(max_length=20, choices=STATUS_TYPE_OBJECT_CHOICES, default="dataproduct")
-
-    def __str__(self):
-         return str(self.id)+':'+str(self.object + '.' +self.name)
-
-
 class Status(models.Model):
-    statusType = models.ForeignKey(StatusType, null=True, on_delete=models.SET_NULL)
+#    name = models.CharField(max_length=20, choices=STATUS_TYPE_NAME_CHOICES, default="unknown")
+    name = models.CharField(max_length=20, default="unknown")
     timestamp = models.DateTimeField('Timestamp of creation in the database.', default=datetime.now, blank=True)
 
     def __str__(self):
-        return str(self.id)+' - '+str(self.derived_name)+' ('+str(self.derived_object)+')'
-
-    @property
-    def derived_name(self):
-        return self.statusType.name
-
-    @property
-    def derived_object(self):
-        return self.statusType.object
+        return str(self.name)
 
 
 class TaskObject(models.Model):
-    TASK_TYPE__CHOICES = (
-        (TASK_TYPE_OBSERVATION, TASK_TYPE_OBSERVATION),
-        (TASK_TYPE_DATAPRODUCT, TASK_TYPE_DATAPRODUCT)
-    )
     name = models.CharField(max_length=100, default="unknown")
     task_type = models.CharField(max_length=20, choices=TASK_TYPE__CHOICES, default=TASK_TYPE_DATAPRODUCT)
 
     taskID = models.CharField('runId', max_length=30, blank=True, null=True)
     creationTime = models.DateTimeField(default=datetime.now, blank=True)
 
-    new_status = models.CharField(max_length=20,choices=STATUS_TYPE_NAME_CHOICES, default="defined")
+#    new_status = models.CharField(max_length=20,choices=STATUS_TYPE_NAME_CHOICES, default="defined")
+    new_status = models.CharField(max_length=20, default="defined", null=True)
+
     new_location = models.CharField(max_length=255, default="unknown",null=True)
     # locations = models.ForeignKey(Location, null=True, blank=True, on_delete=models.CASCADE)
     locations = models.ManyToManyField(Location, null=True, blank=True)
-    status = models.ForeignKey(Status, related_name='taskobject_status', null=True, on_delete=models.CASCADE)
-    statusHistory = models.ManyToManyField(Status, related_name='dataproduct_status_history', blank=True)
+    my_locations = models.CharField(max_length=1024, default="")
 
+    # my_status is 'platgeslagen', because django-filters can not filter on a related property,
+    # and I need services to be able to filter on a status to execute their tasks.
+    my_status = models.CharField(max_length=20,default="defined")
+    statusHistory = models.ManyToManyField(Status, related_name='status_history', blank=True)
 
     def __str__(self):
         return str(self.id)
 
-    @property
-    def derived_status(self):
-        try:
-            return self.status.statusType.name
-        except:
-            return None
 
 class DataProduct(TaskObject):
 

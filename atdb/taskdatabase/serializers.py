@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import DataProduct, Observation, Location, Status, StatusType
+from .models import DataProduct, Observation, Location, Status
 
 
 #class LocationSerializer(serializers.ModelSerializer):
@@ -11,28 +11,15 @@ from .models import DataProduct, Observation, Location, Status, StatusType
 class LocationSerializer(serializers.ModelSerializer):
 
     class Meta:
-
         model = Location
         fields = ('id','location','timestamp')
 
 
-class StatusTypeSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = StatusType
-        fields = '__all__'
-
-
 class StatusSerializer(serializers.ModelSerializer):
-    statusType = serializers.HyperlinkedRelatedField(
-        many=False,
-        queryset = StatusType.objects.all(),
-        view_name='statustype-detail-view',
-        required=True)
 
     class Meta:
         model = Status
-        fields = ('id','timestamp','statusType')
+        fields = ('id','name','timestamp')
 
 
 
@@ -60,27 +47,26 @@ class DataProductSerializer(serializers.ModelSerializer):
 #         many=True,
 #         required=True)
 
-    status = serializers.HyperlinkedRelatedField(
-        many=False,
-        queryset = Status.objects.all(),
-        view_name='status-detail-view',
-        required=False)
+    statusHistory = StatusSerializer(
+         many=True,
+         required=False,
+         read_only=True)
 
-    statusHistory = serializers.HyperlinkedRelatedField(
-        label='History',
-        many=True,
-        queryset = Status.objects.all(),
-        view_name='status-detail-view',
-        # slug_field='derived_name',
-        required=False)
+#    statusHistory = serializers.HyperlinkedRelatedField(
+#        label='History',
+#        many=True,
+#        queryset = Status.objects.all(),
+#        view_name='status-detail-view',
+#        # slug_field='my_status',
+#        required=False)
 
-    #status = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
     class Meta:
         model = DataProduct
         fields = ('id','task_type','name','filename','description','dataproduct_type',
                   'taskID','creationTime','size','quality',
-                  'locations','status','derived_status','statusHistory','generatedByObservation',
-                  'new_location', 'new_status')
+                  'locations','my_locations','my_status','new_status','statusHistory','generatedByObservation',
+                  'new_location')
 
 
 class ObservationSerializer(serializers.ModelSerializer):
@@ -100,21 +86,11 @@ class ObservationSerializer(serializers.ModelSerializer):
         lookup_field='pk',
         required=False)
 
-    status = serializers.HyperlinkedRelatedField(
-        many=False,
-        queryset = Status.objects.all(),
-        view_name='status-detail-view',
-        required=False)
-
-    statusHistory = serializers.HyperlinkedRelatedField(
-        label='History',
-        many=True,
-        queryset = Status.objects.all(),
-        view_name='status-detail-view',
-        #slug_field='derived_name',
-        required=False)
+    statusHistory = StatusSerializer(
+         many=True,
+         required=False)
 
     class Meta:
         model = Observation
         fields = ('id','task_type', 'name', 'process_type','taskID','creationTime',
-                  'new_location','new_status','locations','status','derived_status','statusHistory','generatedDataProducts')
+                  'new_location','locations','my_locations','my_status','new_status','statusHistory','generatedDataProducts')

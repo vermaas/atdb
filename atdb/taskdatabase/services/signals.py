@@ -5,7 +5,7 @@ from django.core.signals import request_started, request_finished
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
-from taskdatabase.models import TaskObject, Observation, DataProduct, Location, Status, StatusType
+from taskdatabase.models import TaskObject, Observation, DataProduct, Location, Status
 from . import jobs
 
 """
@@ -52,29 +52,43 @@ def handle_pre_save(sender, **kwargs):
     if myTaskObject.id==None:
         return None
 
-    current_status = str(myTaskObject.derived_status)
-    new_status = str(myTaskObject.new_status)
     new_location = str(myTaskObject.new_location)
-    logger.info("*** new_location = " + str(new_location) + ")")
 
     # handle location change
     if (new_location!='None'):
         # add a new location to myTaskObject
-        logger.info("*** adding New Location = " + str(new_location))
+        logger.info("adding New Location = " + str(new_location))
         myLocation = Location(location=myTaskObject.new_location)
         myLocation.save()
         myTaskObject.locations.add(myLocation)
 
-    # handle status change
-    if (new_status!=None) and (current_status!=new_status):
-        # add the current status object to the status history.
-        myTaskObject.statusHistory.add(myTaskObject.status)
+        myTaskObject.my_locations = str(myTaskObject.my_locations) + ',' + str(myTaskObject.new_location)
 
-        # then create a new status object and add it to myTaskObject
-        myStatusType = StatusType.objects.get(name=new_status, object=myTaskObject.task_type)
-        myStatus = Status(statusType=myStatusType)
+    # handle status change
+    my_status = str(myTaskObject.my_status)
+    new_status = str(myTaskObject.new_status)
+    if (new_status!=None) and (my_status!=new_status):
+
+        # set the new status
+        myTaskObject.my_status = new_status
+
+        # add the new to the status history by brewing a status object out of it
+        myStatus = Status(name=new_status)
         myStatus.save()
-        myTaskObject.status = myStatus
+        myTaskObject.statusHistory.add(myStatus)
+
+        #myTaskObject.new_status = None
+
+        # if this observation has associated dataproducts, then change their status also.
+        # in retrospect, this may be unexpected behaviour, better do handle that from a service. Commented out for now..
+
+        # if (myTaskObject.task_type == 'observation'):
+        #    dps = DataProduct.objects.filter(taskID=myTaskObject.taskID)
+        #    for dp in dps:
+        #        logger.info("- change status of "+dp.name+ ": "+ dp.my_status + ' => '+str(new_status))
+        #        dp.new_status = new_status
+        #        dp.save()
+
 
     # temporarily disconnect the post_save handler to save the dataproduct (again) and avoiding recursion.
     # I don't use pre_save, because then the 'created' key is not available, which is the most handy way to
@@ -84,7 +98,7 @@ def handle_pre_save(sender, **kwargs):
     connect_signals()
 
     # dispatch a job if the status has changed.
-    if (new_status != None) and (current_status != new_status):
+    if (new_status != None) and (my_status != new_status):
         jobs.dispatchJob(myTaskObject, new_status)
 
 
@@ -109,7 +123,7 @@ def handle_post_save(sender, **kwargs):
     logger.info("handle_post_save("+str(kwargs.get('instance'))+")")
     myTaskObject = kwargs.get('instance')
 
-    # if this is a new dataproduct, then first create a new status and a new locaton for it
+    # CREATE NEW OBSERVATION / DATAPRODUCT
     if kwargs['created']:
         logger.info("save new "+str(myTaskObject.task_type))
 
@@ -119,14 +133,29 @@ def handle_post_save(sender, **kwargs):
         myTaskObject.locations.add(myLocation)
         # myTaskObject.locations_set.add(myLocation)
 
-        # set status
-        myStatusType = StatusType.objects.get(name=myTaskObject.new_status, object=myTaskObject.task_type)
-        myStatus = Status(statusType=myStatusType)
-        myStatus.save()
-        myTaskObject.status = myStatus
+        myTaskObject.my_locations = str(myTaskObject.new_location)
 
-        # if there already is an observation with this taskID, then add this dataproduct to it.
-        # TODO
+        # set status
+        myTaskObject.my_status = myTaskObject.new_status
+
+        # add the new to the status history by brewing a status object out of it
+        myStatus = Status(name=myTaskObject.new_status)
+        myStatus.save()
+        myTaskObject.statusHistory.add(myStatus)
+        #myTaskObject.new_status = None
+
+        # if there are already dataproducts with this taskID, then add them to this observation.
+        if (myTaskObject.task_type=='observation'):
+            # gather all activities of this project, and if needed change their rights
+            dps = DataProduct.objects.filter(taskID=myTaskObject.taskID)
+            for dp in dps:
+                myTaskObject.generatedDataProducts.add(dp)
+
+        # if there already is an observation with this taskID, then add this dataproduct to it
+        if (myTaskObject.task_type == 'dataproduct'):
+            obs = Observation.objects.filter(taskID=myTaskObject.taskID)
+            for o in obs:
+                o.generatedDataProducts.add(myTaskObject)
 
         # temporarily disconnect the post_save handler to save the dataproduct (again) and avoiding recursion.
         # I don't use pre_save, because then the 'created' key is not available, which is the most handy way to

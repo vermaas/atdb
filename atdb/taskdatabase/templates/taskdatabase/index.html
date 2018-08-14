@@ -14,6 +14,7 @@
                 <table class="table table-striped table-bordered table-sm">
                     <thead>
                     <tr>
+                        <th>id</th>
                         <th>TaskID</th>
                         <th>Type</th>
                         <th>Name</th>
@@ -26,12 +27,13 @@
                     {% if observation.derived_status != "removed" %}
 
                     <div class="row">
-                        <tr class="{{ observation.derived_status }}">
+                        <tr class="{{ observation.my_status }}">
+                            <td>{{ observation.id }} </td>
                             <td><a href="/atdb/observations/{{ observation.id }}/" target="_blank">{{ observation.taskID }} </a> </td>
                             <td>{{ observation.process_type }} </td>
                             <td>{{ observation.name }} </td>
                             <td>{{ observation.creationTime }} </td>
-                            <td>{{ observation.derived_status }}</td>
+                            <td>{{ observation.my_status }}</td>
                         </tr>
                     </div>
                     {% endif %}
@@ -54,6 +56,7 @@
                 <table class="table table-striped table-bordered table-sm">
                     <thead>
                     <tr>
+                        <th>id</th>
                         <th>TaskID</th>
                         <th>Type</th>
                         <th>Name</th>
@@ -66,12 +69,13 @@
                             {% if dataproduct.derived_status != "removed" %}
 
                                 <div class="row">
-                                   <tr class="{{ dataproduct.derived_status }}">
+                                   <tr class="{{ dataproduct.my_status }}">
+                                       <td>{{ dataproduct.id }} </td>
                                        <td><a href="/atdb/dataproducts/{{ dataproduct.id }}/" target="_blank">{{ dataproduct.taskID }}</a> </td>
                                        <td>{{ dataproduct.dataproduct_type }} </td>
                                        <td>{{ dataproduct.name }} </td>
                                        <td>{{ dataproduct.creationTime }} </td>
-                                       <td>{{ dataproduct.derived_status }}</td>
+                                       <td>{{ dataproduct.my_status }}</td>
                                     </tr>
                                 </div>
                             {% endif %}

@@ -22,3 +22,8 @@ def dispatchJob(myTaskObject, new_status):
 
 def doAutoIngest(myTaskObject):
     logger.info("STUB - AutoIngest(" + str(myTaskObject) + ")")
+
+
+
+def doCopy(myTaskObject):
+    logger.info("STUB - doCopy(" + str(myTaskObject) + ")")
