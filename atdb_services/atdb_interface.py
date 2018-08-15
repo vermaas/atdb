@@ -83,7 +83,7 @@ class ATDB:
         payload_string = payload_string.replace("/,", "/\",\"")
         payload_string = payload_string.replace("u\"", "\"")
 
-        self.verbose_print("The payload_string: [" + payload_string+"]")
+        self.verbose_print("payload_string: [" + payload_string+"]")
         return payload_string
 
     def encodePayload(self, payload):
@@ -143,7 +143,7 @@ class ATDB:
         """
 
         # split key in resource and field
-        params = key.split(".")
+        params = key.split(":")
         resource = params[0]
         field = params[1]
 
@@ -171,7 +171,7 @@ class ATDB:
         """
 
         # split key in resource and field
-        params = key.split(".")
+        params = key.split(":")
         resource = params[0]
         field = params[1]
 
@@ -208,8 +208,8 @@ class ATDB:
         """
 
         # split key in resource and field
-        if key.find('.')>0:
-            params = key.split(".")
+        if key.find(':')>0:
+            params = key.split(":")
             resource = params[0]
             field = params[1]
         else:
@@ -334,22 +334,22 @@ def main():
             print('--- basic examples --- ')
             print()
             print("Show the 'status' for Observation with taskID 180720003")
-            print("> python atdb_interface.py -o GET --key observations.derived_status --taskid 180223003")
+            print("> python atdb_interface.py -o GET --key observations:my_status --taskid 180223003")
             print()
             print("GET the ID of Observation with taskID 180223003")
-            print("> python atdb_interface.py -o GET_ID --key observations.taskID --value 180223003")
+            print("> python atdb_interface.py -o GET_ID --key observations:taskID --value 180223003")
             print()
             print("GET the ID of Dataproduct with name WSRTA180223003_ALL_IMAGE.jpg")
-            print("> python atdb_interface.py -o GET_ID --key dataproducts.name --value WSRTA180223003_ALL_IMAGE.jpg")
+            print("> python atdb_interface.py -o GET_ID --key dataproducts:name --value WSRTA180223003_ALL_IMAGE.jpg")
             print()
             print("GET the 'status' for Dataproduct with ID = 45")
-            print("> python atdb_interface.py -o GET --key dataproducts.derived_status --id 45")
+            print("> python atdb_interface.py -o GET --key dataproducts:my_status --id 45")
             print()
             print("PUT the 'status' of dataproduct with ID = 45 on 'copied'")
-            print("> python atdb_interface.py -o PUT --key dataproducts.new_status --id 45 --value copied")
+            print("> python atdb_interface.py -o PUT --key dataproducts:new_status --id 45 --value copied")
             print()
             print("PUT the 'status' of observation with taskID 180720003 on 'valid'")
-            print("> python atdb_interface.py -o PUT --key observations.new_status --value valid --taskid 180223003")
+            print("> python atdb_interface.py -o PUT --key observations:new_status --value valid --taskid 180223003")
             print()
             print("DELETE dataproduct with ID = 46 from the database (no files will be deleted).")
             print("> python atdb_interface.py -o DELETE --key dataproducts --id 46")
@@ -361,8 +361,9 @@ def main():
             print()
             print("POST a new dataproduct to the database")
             print("> python atdb_interface.py -o POST --key dataproducts --payload {name:WSRTA180223003_B003.MS,filename:WSRTA180223003_B003.MS,description:WSRTA180223003_B003.MS,dataproduct_type:visibility,taskID:180223003,size:54321,quality:raw,new_status:defined,new_location:datawriter} -v")
+            print()
             print("GET a list of dataproducts with status = 'valid'")
-            print("GET the pending Jobs")
+            print("> python atdb_interface.py -o GET_LIST --key dataproducts:my_query --value valid")
             print('---------------------------------------------------------------------------------------------')
             return
 

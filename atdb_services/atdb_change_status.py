@@ -5,7 +5,8 @@ def change_status(url, search_field, status):
 
     # split host from resource
     s = url.split("atdb/")
-    my_key = s[1] + '.new_status'
+    print(str(s))
+    my_key = s[1] + ':new_status'
     host = s[0]+'atdb/'
     atdb = atdb_interface.ATDB(host)
 

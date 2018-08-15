@@ -1,8 +1,8 @@
 import sys
 import atdb_interface
 
-def add_observation(taskID, nrDataProducts):
-    host = 'http://localhost:8000/atdb'
+def add_observation(taskID, nrDataProducts, host):
+    # host = 'http://localhost:8000/atdb'
     atdb = atdb_interface.ATDB(host)
 
     # add 1 observation
@@ -33,6 +33,6 @@ def add_observation(taskID, nrDataProducts):
         print('- adding dataproduct : ' + str(filename))
         atdb.do_POST(resource='dataproducts', payload=payload)
 
-# atdb_add_observation_fake 180223003 5
+# python.py atdb_add_observation_fake 180223003 5 http://localhost:8000/atdb
 if __name__ == "__main__":
-    add_observation(sys.argv[1], sys.argv[2])
+    add_observation(sys.argv[1], sys.argv[2], sys.argv[3])

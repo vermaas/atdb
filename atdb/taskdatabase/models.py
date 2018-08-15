@@ -69,7 +69,7 @@ class TaskObject(models.Model):
 
     new_location = models.CharField(max_length=255, default="unknown",null=True)
     # locations = models.ForeignKey(Location, null=True, blank=True, on_delete=models.CASCADE)
-    locations = models.ManyToManyField(Location, null=True, blank=True)
+    locations = models.ManyToManyField(Location, blank=True)
     my_locations = models.CharField(max_length=1024, default="")
 
     # my_status is 'platgeslagen', because django-filters can not filter on a related property,
