@@ -95,6 +95,7 @@ class ObservationFilter(filters.FilterSet):
         fields = {
             'process_type': ['exact', 'in'],
             'name': ['exact', 'icontains'],
+            'my_status': ['exact', 'icontains'],
             'taskID': ['exact', 'icontains'],
             'creationTime': ['gt', 'lt', 'gte', 'lte', 'contains', 'exact'],
             'my_locations': ['exact', 'icontains'],

@@ -16,8 +16,7 @@
                     <tr>
                         <th>id</th>
                         <th>TaskID</th>
-                        <th>Type</th>
-                        <th>Name</th>
+                         <th>Name</th>
                         <th>Timestamp</th>
                         <th>Status</th>
                     </tr>
@@ -30,7 +29,6 @@
                         <tr class="{{ observation.my_status }}">
                             <td>{{ observation.id }} </td>
                             <td><a href="/atdb/observations/{{ observation.id }}/" target="_blank">{{ observation.taskID }} </a> </td>
-                            <td>{{ observation.process_type }} </td>
                             <td>{{ observation.name }} </td>
                             <td>{{ observation.creationTime }} </td>
                             <td>{{ observation.my_status }}</td>
@@ -58,7 +56,6 @@
                     <tr>
                         <th>id</th>
                         <th>TaskID</th>
-                        <th>Type</th>
                         <th>Name</th>
                         <th>Timestamp</th>
                         <th>Status</th>
@@ -72,7 +69,6 @@
                                    <tr class="{{ dataproduct.my_status }}">
                                        <td>{{ dataproduct.id }} </td>
                                        <td><a href="/atdb/dataproducts/{{ dataproduct.id }}/" target="_blank">{{ dataproduct.taskID }}</a> </td>
-                                       <td>{{ dataproduct.dataproduct_type }} </td>
                                        <td>{{ dataproduct.name }} </td>
                                        <td>{{ dataproduct.creationTime }} </td>
                                        <td>{{ dataproduct.my_status }}</td>

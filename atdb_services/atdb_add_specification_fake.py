@@ -34,5 +34,6 @@ def add_observation(taskID, nrDataProducts, host):
         atdb.do_POST(resource='dataproducts', payload=payload)
 
 # python.py atdb_add_observation_fake 180223003 5 http://localhost:8000/atdb
+# python.py atdb_add_observation_fake 180223003 15 http://192.168.22.22/atdb
 if __name__ == "__main__":
     add_observation(sys.argv[1], sys.argv[2], sys.argv[3])

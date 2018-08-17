@@ -6,10 +6,10 @@ import argparse
 from datetime import *
 
 """
-altapi.py : a commandline tool to inferface with the ATDB REST API.
+atdb_interface.py : a commandline tool to inferface with the ATDB REST API.
 :author Nico Vermaas - Astron
 """
-VERSION = "0.1.0 (13 aug 2018)"
+VERSION = "0.1.0 (17 aug 2018)"
 
 # ====================================================================
 
@@ -39,7 +39,7 @@ class ATDB:
     Calibrators class, use to parse SIP and update the backend database
     through REST API calls.
     """
-    def __init__(self, host, verbose=True):
+    def __init__(self, host, verbose=False):
         """
         Constructor.
         :param host: the host name of the backend.
@@ -165,7 +165,7 @@ class ATDB:
     def do_GET(self, key, id, taskid, value):
         """
         Do a http GET request to the ATDB backend to find the value of one field of an object
-        :param key: contains the name of the resource and the name of the field separated by a dot.
+        :param key: contains the name of the resource and the name of the field separated by a colon.
         :param id: the database id of the object.
         :param taskid (optional): when the taskid (of an activity) is known it can be used instead of id.
         """
@@ -196,6 +196,41 @@ class ATDB:
             return value
         except:
             raise (ATDBException("ERROR: " + response.url + " not found."))
+
+
+    #  python atdb_interface.py -o GET_LIST --key observations:taskID --query status=valid
+    def do_GET_LIST(self, key, query):
+        """
+        Do a http GET request to the ATDB backend to find the value of one field of an object
+        :param key: contains the name of the resource and the name of the field separated by a dot.
+        :param id: the database id of the object.
+        :param taskid (optional): when the taskid (of an activity) is known it can be used instead of id.
+        """
+
+        # split key in resource and field
+        params = key.split(":")
+        resource = params[0]
+        field = params[1]
+
+        url = self.host + resource + "?" + str(query)
+        self.verbose_print(('url: ' + url))
+
+        response = requests.request("GET", url, headers=self.header)
+        self.verbose_print("[GET " + response.url + "]")
+        self.verbose_print("Response: " + str(response.status_code) + ", " + str(response.reason))
+
+        try:
+            results = json.loads(response.text)
+            # loop through the list of results and extract the requested field (probably taskID),
+            # and add it to the return list.
+            list = []
+            for result in results:
+                value = result[field]
+                list.append(value)
+
+            return list
+        except:
+            raise (ATDBException("ERROR: " + str(response.status_code) + ", " + str(response.reason)))
 
 
     def do_PUT(self, key, id, value, taskid):
@@ -234,7 +269,45 @@ class ATDB:
             self.verbose_print("[PUT " + response.url + "]")
             self.verbose_print("Response: " + str(response.status_code) + ", " + str(response.reason))
         except:
-            raise (ATDBException("ERROR: " + response.url + " not found."))
+            raise (ATDBException("ERROR: " + str(response.status_code) + ", " + str(response.reason)))
+
+
+    # do_PUT_LIST(key = observations:new_status, taskid = 180223003, value = valid)
+    def do_PUT_LIST(self, key, taskid, value):
+        """
+        PUT a value to an existing field of  resource (table).
+        :param key: contains the name of the resource and the name of the field separated by a colon. observations:new_status
+        :param value: the value that has to be PUT in the key. If omitted, an empty put will be done to trigger the signals.
+        :param taskid: the value is PUT to all objects with the provided taskid
+        """
+
+        # split key in resource and field
+        if key.find(':')>0:
+            params = key.split(":")
+            resource = params[0]
+            field = params[1]
+        else:
+            resource = key
+            field = None
+
+        get_key = resource+':id'
+        get_query= 'taskID='+taskid
+        ids = self.do_GET_LIST(get_key,get_query)
+
+        for id in ids:
+            url = self.host + resource + "/" + str(id) + "/"
+            self.verbose_print(('url: ' + url))
+
+            payload = {}
+            if field!=None:
+                payload[field]=value
+                payload = self.encodePayload(payload)
+            try:
+                response = requests.request("PUT", url, data=payload, headers=self.header)
+                self.verbose_print("[PUT " + response.url + "]")
+                self.verbose_print("Response: " + str(response.status_code) + ", " + str(response.reason))
+            except:
+                raise (ATDBException("ERROR: " + str(response.status_code) + ", " + str(response.reason)))
 
 
     def do_POST(self, resource, payload):
@@ -318,6 +391,7 @@ def main():
     parser.add_argument("--id", default=None, help="id of the object to PUT to.")
     parser.add_argument("-t", "--taskid", nargs="?", default=None, help="Optional taskID which can be used instead of '--id' to lookup Observations or Dataproducts.")
     parser.add_argument("--key", default="observations.title", help="resource.field to PUT a value to. Example: observations.title")
+    parser.add_argument("--query", "-q", default="taskID=180223003", help="Query to the REST API")
     parser.add_argument("--value", default="", help="value to PUT in the resource.field. If omitted it will PUT the object without changing values, but the built-in 'signals' will be triggered.")
     parser.add_argument("--payload", "-p", default="{}", help="Payload in json for the POST operation. To create new Observations or Dataproducts. (see examples)")
     parser.add_argument("--show_examples", "-e", default=False, help="Show some examples",action="store_true")
@@ -362,8 +436,14 @@ def main():
             print("POST a new dataproduct to the database")
             print("> python atdb_interface.py -o POST --key dataproducts --payload {name:WSRTA180223003_B003.MS,filename:WSRTA180223003_B003.MS,description:WSRTA180223003_B003.MS,dataproduct_type:visibility,taskID:180223003,size:54321,quality:raw,new_status:defined,new_location:datawriter} -v")
             print()
-            print("GET a list of dataproducts with status = 'valid'")
-            print("> python atdb_interface.py -o GET_LIST --key dataproducts:my_query --value valid")
+            print("GET_LIST of taskIDs for observations with status = 'valid'")
+            print("> python atdb_interface.py -o GET_LIST --key observations:taskID --query status=valid")
+            print()
+            print("GET_LIST of IDs for dataproducts with status = 'invalid'")
+            print("> python atdb_interface.py -o GET_LIST --key dataproducts:id --query status=invalid")
+            print()
+            print("PUT the field 'new_status' on 'valid' for all dataproducts with taskId = '180816001'")
+            print("> python  atdb_interface.py -o PUT_LIST --key dataproducts:new_status --taskid 180816001 --value valid")
             print('---------------------------------------------------------------------------------------------')
             return
 
@@ -375,6 +455,13 @@ def main():
         if (args.operation == 'GET_ID'):
             result = atdb.do_GET_ID(key=args.key, value=args.value)
             print(result)
+
+        if (args.operation == 'GET_LIST'):
+            result = atdb.do_GET_LIST(key=args.key, query=args.query)
+            print(result)
+
+        if (args.operation=='PUT_LIST'):
+            atdb.do_PUT_LIST(key=args.key, taskid=args.taskid, value=args.value)
 
         if (args.operation=='PUT'):
             atdb.do_PUT(key=args.key, id=args.id, value=args.value, taskid=args.taskid)

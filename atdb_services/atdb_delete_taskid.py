@@ -2,7 +2,6 @@ import sys
 import atdb_interface
 
 def delete_taskid(taskID, host):
-    # host = 'http://localhost:8000/atdb'
     atdb = atdb_interface.ATDB(host)
 
     # find the observation
@@ -22,6 +21,7 @@ def delete_taskid(taskID, host):
 
     print('done')
 
-# atdb_delete_taskid 180223003 http://localhost:8000/atdb
+# python atdb_delete_taskid.py 180223003 http://localhost:8000/atdb
+# python atdb_delete_taskid.py 180223003_IMG http://192.168.22.22/atdb
 if __name__ == "__main__":
     delete_taskid(sys.argv[1], sys.argv[2])

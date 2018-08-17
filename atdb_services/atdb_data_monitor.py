@@ -1,4 +1,5 @@
 import os, sys
+import time
 import atdb_interface
 from os import scandir
 
@@ -30,7 +31,6 @@ def monitor_dir(dir_to_monitor,host):
 
     # check for directories per observation
     observation_dirs = os.listdir(dir_to_monitor)
-    print(observation_dirs)
 
     for obs_dir in scandir(dir_to_monitor):
         if obs_dir.is_dir(follow_symlinks=False):
@@ -42,6 +42,7 @@ def monitor_dir(dir_to_monitor,host):
             id = atdb.do_GET_ID(key='observations:taskID', value=taskID)
             if int(id)<0:
                 # only POST a new observations
+                print('add observation '+obs_dir_name+' to ATDB...')
                 payload = create_obs_payload(taskID, obs_dir_name)
                 atdb.do_POST(resource='observations', payload=payload)
 
@@ -54,11 +55,20 @@ def monitor_dir(dir_to_monitor,host):
                     id = atdb.do_GET_ID(key='dataproducts:filename', value=dp_file_name)
                     if int(id) < 0:
                       # only POST a new dataproducts
+                      print('- add dataproduct ' + dp_file_name + ' to ATDB...')
                       payload = create_dataproduct_payload(taskID, dp_file_name)
                       atdb.do_POST(resource='dataproducts', payload=payload)
 
 
-# atdb_data_monitor d:\my_datawriter http://localhost:8000/atdb/
-# python atdb_data_monitor.py d:\my_datawriter http://192.168.22.22/atdb/
+# python atdb_data_monitor.py d:\my_datawriter 60 http://localhost:8000/atdb/
+# python atdb_data_monitor.py d:\my_datawriter 30 http://192.168.22.22/atdb/
 if __name__ == "__main__":
-    monitor_dir(sys.argv[1], sys.argv[2])
+    dir_to_monitor = sys.argv[1]
+    interval_seconds = sys.argv[2]
+    host = sys.argv[3]
+
+    while True:
+        monitor_dir(dir_to_monitor, host)
+        print('sleep '+interval_seconds+' secs')
+        time.sleep(int(interval_seconds))
+

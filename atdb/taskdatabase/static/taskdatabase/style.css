@@ -8,11 +8,11 @@ TD {
 }
 
 .created {
+  background-color: lemonchiffon;
   color: blue;
 }
 
 .valid {
-  background-color: lemonchiffon;
   color: green;
 }
 .copied {
@@ -26,6 +26,13 @@ TD {
 }
 .removed {
   color: darkgray;
+}
+.invalid,.error,.aborted {
+  color: red;
+}
+.ingesting {
+ color: green;
+ font-weight: bold;
 }
 
 p.title {
