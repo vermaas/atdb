@@ -64,7 +64,12 @@ class ATDBService:
         self.user = user
         self.password = password
         self.atdb_interface = atdb_interface.ATDB(self.host, self.verbose)
-        self.alta_interface = alta_interface.ALTA(self.alta_host,self.user,self.password, self.verbose)
+
+        try:
+            self.alta_interface = alta_interface.ALTA(self.alta_host,self.user,self.password, self.verbose)
+        except:
+            print("ERROR: No connection to ALTA could be made on "+self.alta_host+". Continuing without ALTA connection.")
+            print("Warning: ingest_monitor will not work, status will appear to stay on 'ingesting' until connection with ALTA is restored.")
 
     def verbose_print(self, info_str):
         """
@@ -86,22 +91,22 @@ class ATDBService:
 
         return taskID
 
-    def create_obs_payload(self, taskID, obs_dir_name):
+    def create_obs_payload(self, taskID, obs_dir_name, status):
         payload = "{name:" + obs_dir_name + ','
         payload += "taskID:" + taskID + ','
         payload += "task_type:observation" + ','
-        payload += "new_status:created"
+        payload += "new_status:"+status
         payload += "}"
         return payload
 
-    def create_dataproduct_payload(self, taskID, db_file_name):
+    def create_dataproduct_payload(self, taskID, db_file_name, status):
         payload = "{name:" + str(db_file_name) + ','
         payload += "taskID:" + str(taskID) + ','
         payload += "filename:" + db_file_name + ','
         payload += "description:" + db_file_name + ','
         payload += "size:11111" + ','
         payload += "quality:?" + ','
-        payload += "new_status:created"
+        payload += "new_status:"+status
         payload += "}"
         return payload
 
@@ -161,7 +166,7 @@ class ATDBService:
                 if int(id) < 0:
                     # only POST a new observations
                     self.verbose_print('add observation ' + obs_dir_name + ' to ATDB...')
-                    payload = self.create_obs_payload(taskID, obs_dir_name)
+                    payload = self.create_obs_payload(taskID, obs_dir_name,"created")
                     self.atdb_interface.do_POST(resource='observations', payload=payload)
 
                 # scan for dataproducts in the observation directory
@@ -174,7 +179,7 @@ class ATDBService:
                         if int(id) < 0:
                             # only POST a new dataproducts
                             self.verbose_print('- add dataproduct ' + dp_file_name + ' to ATDB...')
-                            payload = self.create_dataproduct_payload(taskID, dp_file_name)
+                            payload = self.create_dataproduct_payload(taskID, dp_file_name, "created")
                             self.atdb_interface.do_POST(resource='dataproducts', payload=payload)
 
     # --------------------------------------------------------------------------------------------------------
@@ -232,7 +237,25 @@ class ATDBService:
             self.atdb_interface.do_PUT(key=my_key, id=search_value, taskid=None, value=status)
 
 # --------------------------------------------------------------------------------------------------------
-    def delete_taskid(self, taskid):
+    #TODO: finish
+    def service_auto_ingest(self,old_status, new_status):
+
+        # get the list taskID of 'valid' observations
+        taskIDs = self.atdb_interface.do_GET_LIST(key='observations:taskID', query='my_status=' + old_status)
+        self.verbose_print(str(taskIDs))
+
+        # loop through the list of 'valid' observations and gather its valid dataproducts,
+        # by name, because that is the key that is used for the ingest.
+        for taskID in taskIDs:
+            dataproducts = self.atdb_interface.do_GET_LIST(key='dataproducts:name',
+                                            query='taskID=' + taskID + '&my_status=' + old_status)
+            self.verbose_print(str(dataproducts))
+
+        # connect to ALTA
+
+
+# --------------------------------------------------------------------------------------------------------
+    def service_delete_taskid(self, taskid):
 
         # find the observation
         id = self.atdb_interface.do_GET_ID(key='observations:taskID', value=taskid)
@@ -308,6 +331,9 @@ def main():
             print("Start the IngestMonitor and let it check for finished ingests every minute")
             print(">python atdb_service.py -o ingest_monitor --interval 60")
             print()
+            print("Start (auto) ingest. This service will look for 'valid' tasks and dataproducts and starts the ingest to ALTA")
+            print(">python atdb_service.py -o ingest --interval 60")
+            print()
             print("Change status of all dataproducts with taskid=180223003 to valid")
             print(">python atdb_service.py -o change_status --resource dataproducts --search_key taskid:180223003_IMG --status valid")
             print()
@@ -333,6 +359,10 @@ def main():
 
         # --------------------------------------------------------------------------------------------------------
         if (args.operation=='data_monitor'):
+            if not args.dir:
+                print("ERROR: --dir is requied for 'data_monitor'")
+                return
+
             atdb_service.service_data_monitor(dir_to_monitor=args.dir)
             if args.interval:
                 print('starting polling ' + atdb_service.host + ' every ' + args.interval + ' secs')
@@ -352,12 +382,22 @@ def main():
                     time.sleep(int(args.interval))
 
         # --------------------------------------------------------------------------------------------------------
+        if (args.operation == 'ingest'):
+            atdb_service.service_auto_ingest(old_status='valid', new_status='ingesting')
+            if args.interval:
+                print('starting polling ' + atdb_service.host + ' every ' + args.interval + ' secs')
+                while True:
+                    atdb_service.service_auto_ingest(old_status='valid', new_status='ingesting')
+                    print('sleep ' + args.interval + ' secs')
+                    time.sleep(int(args.interval))
+
+        # --------------------------------------------------------------------------------------------------------
         if (args.operation=='change_status'):
             atdb_service.service_change_status(resource=args.resource, search_key=args.search_key, status=args.status)
 
         # --------------------------------------------------------------------------------------------------------
         if (args.operation=='delete_taskid'):
-            atdb_service.delete_taskid(taskid=args.taskid)
+            atdb_service.service_delete_taskid(taskid=args.taskid)
 
 
     except ATDBException as exp:

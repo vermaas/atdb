@@ -4,10 +4,10 @@
 
 <div class="container-fluid details-container">
     <div class="row">
-    <div class="col-sm-6 col-md-6 col-lg-6">
+    <div class="col-sm-12 col-md-12 col-lg-12">
         {% if latest_observations_list %}
         <div class="panel panel-success">
-            <div class="panel-heading">Latest 50 Observations</div>
+            <div class="panel-heading">Latest 50 Tasks</div>
 
             <div class="panel-body">
 
@@ -16,22 +16,28 @@
                     <tr>
                         <th>id</th>
                         <th>TaskID</th>
-                         <th>Name</th>
+                        <th>Type</th>
+                        <th>Name</th>
                         <th>Timestamp</th>
                         <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for observation in latest_observations_list %}
-                    {% if observation.derived_status != "removed" %}
+                    {% if observation.my_status != "removed" %}
 
                     <div class="row">
                         <tr class="{{ observation.my_status }}">
                             <td>{{ observation.id }} </td>
                             <td><a href="/atdb/observations/{{ observation.id }}/" target="_blank">{{ observation.taskID }} </a> </td>
+                            <td>{{ observation.process_type }} </td>
                             <td>{{ observation.name }} </td>
                             <td>{{ observation.creationTime }} </td>
                             <td>{{ observation.my_status }}</td>
+                            <td>
+                                <a href="{% url 'observation-validate-view' observation.pk %}" class="btn btn-success btn-sm" role="button">Validate</a>
+                            </td>
                         </tr>
                     </div>
                     {% endif %}
@@ -44,8 +50,7 @@
 
             </div>
         </div>
-    </div>
-    <div class="col-sm-6 col-md-6 col-lg-6">
+
         {% if latest_dataproducts_list %}
         <div class="panel panel-success">
             <div class="panel-heading">Latest 50 Dataproducts</div>
@@ -63,7 +68,7 @@
                     </thead>
                     <tbody>
                         {% for dataproduct in latest_dataproducts_list %}
-                            {% if dataproduct.derived_status != "removed" %}
+                            {% if dataproduct.my_status != "removed" %}
 
                                 <div class="row">
                                    <tr class="{{ dataproduct.my_status }}">

@@ -23,4 +23,7 @@ urlpatterns = [
 
     path('status/', views.StatusListView.as_view()),
     path('status/<int:pk>/', views.StatusDetailsView.as_view(), name='status-detail-view'),
+
+    path('observations/<int:pk>/validate', views.ObservationValidateView.as_view(), name='observation-validate-view'),
+
 ]

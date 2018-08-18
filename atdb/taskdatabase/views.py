@@ -1,6 +1,7 @@
 import logging
 from django.http import HttpResponse
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.response import Response
 from django_filters import rest_framework as filters
 from django.template import loader
 from django.shortcuts import render
@@ -118,3 +119,17 @@ class ObservationDetailsView(generics.RetrieveUpdateDestroyAPIView):
     model = Observation
     queryset = Observation.objects.all()
     serializer_class = ObservationSerializer
+
+
+class ObservationValidateView(generics.UpdateAPIView):
+    model = Observation
+    queryset = Observation.objects.all()
+    serializer_class = ObservationSerializer
+    # overriding GET get_queryset to access the request (demoo)
+
+    def get(self, request, pk, format=None):
+        logger.info('*** ObservationValidateView.get() ***')
+        observation = self.get_object()
+        observation.new_status = 'valid'
+        observation.save()
+        return Response(None)
