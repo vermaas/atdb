@@ -4,7 +4,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from django_filters import rest_framework as filters
 from django.template import loader
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from .models import DataProduct, Observation, Location, Status
 from .serializers import DataProductSerializer, ObservationSerializer, LocationSerializer, StatusSerializer
@@ -132,4 +132,13 @@ class ObservationValidateView(generics.UpdateAPIView):
         observation = self.get_object()
         observation.new_status = 'valid'
         observation.save()
-        return Response(None)
+        return redirect('/atdb/')
+
+
+def BasicObservationValidateView(request,pk):
+    model = Observation
+    observation = Observation.objects.get(pk=pk)
+    observation.new_status = 'valid'
+    observation.save()
+
+    return redirect('/atdb/')
