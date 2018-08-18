@@ -387,7 +387,7 @@ def main():
     parser.add_argument("-v","--verbose", default=False, help="More information at run time.",action="store_true")
     parser.add_argument("--host", nargs="?", default=DEFAULT_BACKEND_HOST, help= "Host url. Production = https://alta.astron.nl/altapi/, Acceptance = https://alta-acc.astron.nl/altapi/, Development (default) = http://localhost:8000/altapi/")
     parser.add_argument("--version", default=False, help="Show current version of this program, and the version of the ALTA backend.", action="store_true")
-    parser.add_argument("--operation","-o", default="GET", help="GET, GET_ID, PUT, DELETE. Note that these operations will only work if you have the proper rights in the ALTA user database.")
+    parser.add_argument("--operation","-o", default="GET", help="GET, GET_ID, GET_LIST, POST, PUT, DELETE. Note that these operations will only work if you have the proper rights in the ALTA user database.")
     parser.add_argument("--id", default=None, help="id of the object to PUT to.")
     parser.add_argument("-t", "--taskid", nargs="?", default=None, help="Optional taskID which can be used instead of '--id' to lookup Observations or Dataproducts.")
     parser.add_argument("--key", default="observations.title", help="resource.field to PUT a value to. Example: observations.title")

@@ -40,3 +40,13 @@ p.title {
 	font-size: 18pt;
 }
 
+.footer {
+  font-family: Arial;
+  font-size: 10pt;
+  font-style: italic;
+}
+
+.ml-auto .dropdown-menu {
+  left: auto !important;
+  right: 0px;
+}

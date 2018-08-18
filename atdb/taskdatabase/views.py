@@ -124,11 +124,8 @@ class ObservationDetailsView(generics.RetrieveUpdateDestroyAPIView):
 class ObservationValidateView(generics.UpdateAPIView):
     model = Observation
     queryset = Observation.objects.all()
-    serializer_class = ObservationSerializer
-    # overriding GET get_queryset to access the request (demoo)
 
     def get(self, request, pk, format=None):
-        logger.info('*** ObservationValidateView.get() ***')
         observation = self.get_object()
         observation.new_status = 'valid'
         observation.save()
@@ -140,5 +137,39 @@ def BasicObservationValidateView(request,pk):
     observation = Observation.objects.get(pk=pk)
     observation.new_status = 'valid'
     observation.save()
+
+    return redirect('/atdb/')
+
+
+# set the status of all dataproducts if this observation to 'new_status'
+def ObservationSetStatusDataProducts(request,pk,new_status):
+    model = Observation
+    observation = Observation.objects.get(pk=pk)
+    taskID = observation.taskID
+
+    dataproducts = DataProduct.objects.filter(taskID=taskID)
+    for dataproduct in dataproducts:
+        dataproduct.new_status = new_status
+        dataproduct.save()
+
+    return redirect('/atdb/')
+
+class DataProductValidateView(generics.UpdateAPIView):
+    model = DataProduct
+    queryset = DataProduct.objects.all()
+    serializer_class = DataProductSerializer
+
+    def get(self, request, pk, format=None):
+        dataproduct = self.get_object()
+        dataproduct.new_status = 'valid'
+        dataproduct.save()
+        return redirect('/atdb/')
+
+
+def DataProductSetStatusView(request,pk,new_status):
+    model = DataProduct
+    dataproduct = DataProduct.objects.get(pk=pk)
+    dataproduct.new_status = new_status
+    dataproduct.save()
 
     return redirect('/atdb/')

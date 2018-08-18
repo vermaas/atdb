@@ -25,6 +25,8 @@ urlpatterns = [
     path('status/<int:pk>/', views.StatusDetailsView.as_view(), name='status-detail-view'),
 
     path('observations/<int:pk>/validate', views.ObservationValidateView.as_view(), name='observation-validate-view'),
+    path('observations/<int:pk>/setstatus_dps/<new_status>', views.ObservationSetStatusDataProducts, name='observation-dps-setstatus-view'),
+    path('dataproducts/<int:pk>/setstatus/<new_status>', views.DataProductSetStatusView, name='dataproduct-setstatus-view'),
     #path('observations/<int:pk>/validate', views.BasicObservationValidateView, name='observation-validate-view'),
 
 ]

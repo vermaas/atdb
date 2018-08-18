@@ -36,7 +36,10 @@
                             <td>{{ observation.creationTime }} </td>
                             <td>{{ observation.my_status }}</td>
                             <td>
-                                <a href="{% url 'observation-validate-view' observation.pk %}" class="btn btn-success btn-sm" role="button">Validate</a>
+                                {% if observation.my_status != "valid" and observation.my_status != "ingesting" %}
+                                <a href="{% url 'observation-dps-setstatus-view' observation.pk 'valid'%}" class="btn btn-warning btn-sm" role="button">Validate DPS</a>
+                                <a href="{% url 'observation-validate-view' observation.pk %}" class="btn btn-warning btn-sm" role="button">Validate & Ingest</a>
+                                {% endif %}
                             </td>
                         </tr>
                     </div>
@@ -64,7 +67,8 @@
                         <th>Name</th>
                         <th>Timestamp</th>
                         <th>Status</th>
-                    </tr>
+                        <th>Actions</th>
+                     </tr>
                     </thead>
                     <tbody>
                         {% for dataproduct in latest_dataproducts_list %}
@@ -77,6 +81,14 @@
                                        <td>{{ dataproduct.name }} </td>
                                        <td>{{ dataproduct.creationTime }} </td>
                                        <td>{{ dataproduct.my_status }}</td>
+                                       <td>
+                                            {% if dataproduct.my_status == "created" or dataproduct.my_status == "invalid" %}
+                                            <a href="{% url 'dataproduct-setstatus-view' dataproduct.pk 'valid'%}" class="btn btn-warning btn-sm" role="button">Validate</a>
+                                            {% endif %}
+                                            {% if dataproduct.my_status == "created" or dataproduct.my_status == "valid" %}
+                                            <a href="{% url 'dataproduct-setstatus-view' dataproduct.pk 'invalid' %}" class="btn btn-success btn-sm" role="button">Invalidate</a>
+                                            {% endif %}
+                                       </td>
                                     </tr>
                                 </div>
                             {% endif %}
@@ -91,4 +103,6 @@
     </div>
     </div>
 </div>
+    <p class="footer"> Version 1.0 (18 aug 2018)</p>
+
 {% endblock %}

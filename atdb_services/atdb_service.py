@@ -247,12 +247,17 @@ class ATDBService:
         # loop through the list of 'valid' observations and gather its valid dataproducts,
         # by name, because that is the key that is used for the ingest.
         for taskID in taskIDs:
-            dataproducts = self.atdb_interface.do_GET_LIST(key='dataproducts:name',
+            self.atdb_interface.do_PUT(key='observations:new_status', id=None, taskid=taskID, value=new_status)
+
+            ids = self.atdb_interface.do_GET_LIST(key='dataproducts:id',
                                             query='taskID=' + taskID + '&my_status=' + old_status)
-            self.verbose_print(str(dataproducts))
+            self.verbose_print(str(ids))
+            for id in ids:
+                self.atdb_interface.do_PUT(key='dataproducts:new_status', id=id, taskid=None, value=new_status)
 
-        # connect to ALTA
 
+        # create the ingest parameter file
+        # TODO: move the invalid dataproducts away? rename them so that the ingest doesn't recognize them?
 
 # --------------------------------------------------------------------------------------------------------
     def service_delete_taskid(self, taskid):
