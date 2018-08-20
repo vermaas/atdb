@@ -36,7 +36,7 @@
                             <td>{{ observation.creationTime }} </td>
                             <td>{{ observation.my_status }}</td>
                             <td>
-                                {% if observation.my_status != "valid" and observation.my_status != "ingesting" %}
+                                {% if observation.my_status == "created" %}
                                 <a href="{% url 'observation-dps-setstatus-view' observation.pk 'valid'%}" class="btn btn-warning btn-sm" role="button">Validate DPS</a>
                                 <a href="{% url 'observation-validate-view' observation.pk %}" class="btn btn-warning btn-sm" role="button">Validate & Ingest</a>
                                 {% endif %}

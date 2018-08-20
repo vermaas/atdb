@@ -238,7 +238,7 @@ class ATDBService:
 
 # --------------------------------------------------------------------------------------------------------
     #TODO: finish
-    def service_auto_ingest(self,old_status, new_status):
+    def service_start_ingest(self,old_status, new_status):
 
         # get the list taskID of 'valid' observations
         taskIDs = self.atdb_interface.do_GET_LIST(key='observations:taskID', query='my_status=' + old_status)
@@ -336,8 +336,8 @@ def main():
             print("Start the IngestMonitor and let it check for finished ingests every minute")
             print(">python atdb_service.py -o ingest_monitor --interval 60")
             print()
-            print("Start (auto) ingest. This service will look for 'valid' tasks and dataproducts and starts the ingest to ALTA")
-            print(">python atdb_service.py -o ingest --interval 60")
+            print("Start Ingest. This service will look for 'valid' tasks and dataproducts and starts the ingest to ALTA")
+            print(">python atdb_service.py -o start_ingest --interval 60")
             print()
             print("Change status of all dataproducts with taskid=180223003 to valid")
             print(">python atdb_service.py -o change_status --resource dataproducts --search_key taskid:180223003_IMG --status valid")
@@ -387,12 +387,12 @@ def main():
                     time.sleep(int(args.interval))
 
         # --------------------------------------------------------------------------------------------------------
-        if (args.operation == 'ingest'):
-            atdb_service.service_auto_ingest(old_status='valid', new_status='ingesting')
+        if (args.operation == 'start_ingest'):
+            atdb_service.service_start_ingest(old_status='valid', new_status='ingesting')
             if args.interval:
                 print('starting polling ' + atdb_service.host + ' every ' + args.interval + ' secs')
                 while True:
-                    atdb_service.service_auto_ingest(old_status='valid', new_status='ingesting')
+                    atdb_service.service_start_ingest(old_status='valid', new_status='ingesting')
                     print('sleep ' + args.interval + ' secs')
                     time.sleep(int(args.interval))
 
