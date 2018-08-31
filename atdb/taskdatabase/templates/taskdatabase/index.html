@@ -37,8 +37,8 @@
                             <td>{{ observation.my_status }}</td>
                             <td>
                                 {% if observation.my_status == "created" %}
-                                <a href="{% url 'observation-dps-setstatus-view' observation.pk 'valid'%}" class="btn btn-warning btn-sm" role="button">Validate DPS</a>
-                                <a href="{% url 'observation-validate-view' observation.pk %}" class="btn btn-warning btn-sm" role="button">Validate & Ingest</a>
+                                <a href="{% url 'observation-dps-setstatus-view' observation.pk 'valid'%}" class="btn btn-success btn-sm" role="button">Validate DPS</a>
+                                <a href="{% url 'observation-validate-view' observation.pk %}" class="btn btn-primary btn-sm" role="button">Start Ingest</a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -83,10 +83,10 @@
                                        <td>{{ dataproduct.my_status }}</td>
                                        <td>
                                             {% if dataproduct.my_status == "created" or dataproduct.my_status == "invalid" %}
-                                            <a href="{% url 'dataproduct-setstatus-view' dataproduct.pk 'valid'%}" class="btn btn-warning btn-sm" role="button">Validate</a>
+                                            <a href="{% url 'dataproduct-setstatus-view' dataproduct.pk 'valid'%}" class="btn btn-success btn-sm" role="button">Validate</a>
                                             {% endif %}
                                             {% if dataproduct.my_status == "created" or dataproduct.my_status == "valid" %}
-                                            <a href="{% url 'dataproduct-setstatus-view' dataproduct.pk 'invalid' %}" class="btn btn-success btn-sm" role="button">Invalidate</a>
+                                            <a href="{% url 'dataproduct-setstatus-view' dataproduct.pk 'invalid' %}" class="btn btn-warning btn-sm" role="button">Skip</a>
                                             {% endif %}
                                        </td>
                                     </tr>

@@ -11,7 +11,7 @@ import argparse
 altapi.py : a commandline tool to inferface with the ATDB REST API.
 :author Nico Vermaas - Astron
 """
-VERSION = "1.0.0 (17 aug 2018)"
+VERSION = "1.0.0 (21 aug 2018)"
 
 # ====================================================================
 
@@ -22,9 +22,19 @@ ATDB_HEADER = {
     'authorization': "Basic YWRtaW46YWRtaW4="
 }
 
-DEFAULT_ATDB_HOST = "http://localhost:8000/atdb"
-DEFAULT_ATDB_HOST = "http://192.168.22.22/atdb"
-DEFAULT_ALTA_HOST = "http://localhost:8000/altapi"
+# some cconstants
+ATDB_HOST_DEV = "http://localhost:8000/atdb"
+ATDB_HOST_TEST = "http://192.168.22.22/atdb"
+ATDB_HOST_PROD = "http://apertif.astron.nl/atdb" # ???
+
+ALTA_HOST_DEV = "http://localhost:8000/altapi"
+ALTA_HOST_TEST = "http://alta-sys.astron.nl/altapi"
+ALTA_HOST_ACC = "https://alta-acc.astron.nl/altapi"
+ALTA_HOST_PROD = "https://alta.astron.nl/altapi"
+
+DEFAULT_ATDB_HOST = ATDB_HOST_TEST
+DEFAULT_ALTA_HOST = ALTA_HOST_DEV
+
 
 TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -43,7 +53,7 @@ class ATDBService:
     """
     ATDBService class. This class contains all the atdb services.
     """
-    def __init__(self, host, alta_host, user, password,verbose=False):
+    def __init__(self, atdb_host, alta_host, user, password,verbose=False):
         """
         Constructor.
         :param host: the host name of the backend.
@@ -51,12 +61,29 @@ class ATDBService:
         :param verbose: more information runtime.
         :param header: Request header for Atdb REST requests with token authentication.
         """
-        self.host = host
-        if (not self.host.endswith('/')):
+
+        # accept some presets to set host to dev, test, acc or prod
+        self.host = atdb_host
+        if self.host=='dev':
+            self.host = ATDB_HOST_DEV
+        elif self.host=='test':
+            self.host = ATDB_HOST_TEST
+        elif self.host=='prod':
+            self.host = ATDB_HOST_PROD
+        elif (not self.host.endswith('/')):
             self.host += '/'
 
         self.alta_host = alta_host
-        if (not self.alta_host.endswith('/')):
+
+        if self.alta_host=='dev':
+            self.alta_host = ALTA_HOST_DEV
+        elif self.alta_host=='test':
+            self.alta_host = ALTA_HOST_TEST
+        elif self.alta_host=='acc':
+            self.alta_host = ALTA_HOST_ACC
+        elif self.alta_host=='prod':
+            self.alta_host = ALTA_HOST_PROD
+        elif (not self.alta_host.endswith('/')):
             self.alta_host += '/'
 
         self.verbose = verbose
@@ -68,8 +95,8 @@ class ATDBService:
         try:
             self.alta_interface = alta_interface.ALTA(self.alta_host,self.user,self.password, self.verbose)
         except:
-            print("ERROR: No connection to ALTA could be made on "+self.alta_host+". Continuing without ALTA connection.")
-            print("Warning: ingest_monitor will not work, status will appear to stay on 'ingesting' until connection with ALTA is restored.")
+            print("WARNING: No connection to ALTA could be made on "+self.alta_host+" (valid credentials provided?). Continuing without ALTA connection.")
+            print("(Currently, only the 'ingest_monitor' service needs an ALTA connection to check if it can change the status from 'ingesting' to 'archived'. The other services will run fine without the ALTA connection)")
 
     def verbose_print(self, info_str):
         """
@@ -301,12 +328,12 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("-v","--verbose", default=False, help="More information at run time.",action="store_true")
-    parser.add_argument("--atdb_host", nargs="?", default=DEFAULT_ATDB_HOST, help= "Production = https://atdb.astron.nl/atdb/, Test = https://192.168.22.22/atdb, Development (default) = http://localhost:8000/atdb")
-    parser.add_argument("--alta_host", nargs="?", default=DEFAULT_ALTA_HOST, help="Production = https://alta.astron.nl/altapi/, Acceptance = https://alta-acc.astron.nl/altapi, Development (default) = http://localhost:8000/altapi")
+    parser.add_argument("--atdb_host", nargs="?", default=DEFAULT_ATDB_HOST, help="Presets are 'dev', 'test', 'prod'. Otherwise give a full url like https://atdb.astron.nl/atdb")
+    parser.add_argument("--alta_host", nargs="?", default=DEFAULT_ALTA_HOST, help="Presets are 'dev', 'test', 'acc', 'prod'. Otherwise give a full url like https://alta-acc.astron.nl/altapi")
     parser.add_argument("-u","--user", nargs="?", default='vagrant', help="Username.")
     parser.add_argument("-p", "--password", nargs="?", default='vagrant', help="Password.")
     parser.add_argument("--version", default=False, help="Show current version of this program, and the version of the ALTA backend.", action="store_true")
-    parser.add_argument("--operation","-o", default="data-monitor", help="options are: data_monitor, ingest_monitor, ingest, add_fake, delete_taskid, change_status, validate, cleanup")
+    parser.add_argument("--operation","-o", default="None", help="options are: data_monitor, ingest_monitor, ingest, add_fake, delete_taskid, change_status, validate, cleanup")
     parser.add_argument("--resource","-r", default='observations', help="observations or dataproducts")
     parser.add_argument("--search_key", "-k", default='taskid:180223003', help="Search key used for various services")
     parser.add_argument("--taskid", nargs="?", default=None, help="Optional taskID which can be used instead of '--id' to lookup Observations or Dataproducts.")
@@ -359,6 +386,11 @@ def main():
             return
 
         # --------------------------------------------------------------------------------------------------------
+        if (args.version):
+            print('--- atdb_service.py version = '+VERSION + '---')
+            return
+
+        # --------------------------------------------------------------------------------------------------------
         if (args.operation=='add_fake'):
             atdb_service.add_fake(taskid=args.taskid, count=args.count, status=args.status)
 
@@ -373,7 +405,6 @@ def main():
                 print('starting polling ' + atdb_service.host + ' every ' + args.interval + ' secs')
                 while True:
                     atdb_service.service_data_monitor(dir_to_monitor=args.dir)
-                    print('sleep ' + args.interval + ' secs')
                     time.sleep(int(args.interval))
 
         # --------------------------------------------------------------------------------------------------------
@@ -383,7 +414,6 @@ def main():
                 print('starting polling ' + atdb_service.host + ' every ' + args.interval + ' secs')
                 while True:
                     atdb_service.service_ingest_monitor(dir_to_monitor=args.dir,old_status='ingesting',new_status='archived')
-                    print('sleep ' + args.interval + ' secs')
                     time.sleep(int(args.interval))
 
         # --------------------------------------------------------------------------------------------------------
@@ -393,7 +423,6 @@ def main():
                 print('starting polling ' + atdb_service.host + ' every ' + args.interval + ' secs')
                 while True:
                     atdb_service.service_start_ingest(old_status='valid', new_status='ingesting')
-                    print('sleep ' + args.interval + ' secs')
                     time.sleep(int(args.interval))
 
         # --------------------------------------------------------------------------------------------------------

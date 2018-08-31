@@ -126,7 +126,7 @@ class ATDB:
             taskobject = results[0]
             return taskobject
         except:
-            raise (ATDBException("ERROR: " + response.url + " not found."))
+            raise (ATDBException("ERROR: " + str(response.status_code) + ", " + str(response.reason)))
 
     # ------------------------------------------------------------------------------#
     #                                Main User functions                            #

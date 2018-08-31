@@ -126,6 +126,10 @@ class Observation(TaskObject):
     process_type = models.CharField(max_length=50, default="observation")
     generatedDataProducts = models.ManyToManyField(DataProduct, related_name='generatedByObservation', blank=True)
 
+    @property
+    def dps_count(self):
+        len(self.generatedDataProducts)
+
     def __str__(self):
         return str(self.taskID + ' - ' +self.name)
 

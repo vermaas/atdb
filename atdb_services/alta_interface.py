@@ -9,7 +9,7 @@ from datetime import *
 alta_interface.py : a commandline tool to inferface with the ALTA REST API.
 :author Nico Vermaas - Astron
 """
-VERSION = "0.9.5-RC1 (16 aug 2018)"
+VERSION = "0.9.5-RC1 (24 aug 2018)"
 
 # ====================================================================
 
@@ -50,6 +50,9 @@ class ALTA:
         :param header: Request header for ALTA REST requests with token authentication.
         """
         self.host = host
+        if (not self.host.endswith('/')):
+            self.host += '/'
+
         self.username = username
         self.password = password
         self.verbose = verbose
@@ -179,7 +182,7 @@ class ALTA:
             activity = results["results"][0]
             return activity
         except:
-            raise (ALTAException("ERROR: " + response.url + " not found."))
+            raise (ALTAException("ERROR: " + str(response.status_code) + ", " + str(response.reason)))
 
     # ------------------------------------------------------------------------------#
     #                                Main User functions                            #
@@ -198,10 +201,13 @@ class ALTA:
 
         try:
             results = json.loads(response.text)
-            version = results["version"]
+            try:
+                version = results["version"]
+            except:
+                version = 'unknown'
             return version
         except:
-            raise (ALTAException("ERROR: " + response.url + " not found."))
+            raise (ALTAException("ERROR: " + str(response.status_code) + ", " + str(response.reason)))
 
 
     def do_GET_ID(self, key, value):
@@ -265,7 +271,7 @@ class ALTA:
             value = results[field]
             return value
         except:
-            raise (ALTAException("ERROR: " + response.url + " not found."))
+            raise (ALTAException("ERROR: " + str(response.status_code) + ", " + str(response.reason)))
 
 
     def do_PUT(self, key, id, value, runid):
@@ -304,7 +310,7 @@ class ALTA:
             self.verbose_print("[PUT " + response.url + "]")
             self.verbose_print("Response: " + str(response.status_code) + ", " + str(response.reason))
         except:
-            raise (ALTAException("ERROR: " + response.url + " not found."))
+            raise (ALTAException("ERROR: " + str(response.status_code) + ", " + str(response.reason)))
 
 
     def do_DELETE(self, key, id):
@@ -322,43 +328,42 @@ class ALTA:
             self.verbose_print("[DELETE " + response.url + "]")
             self.verbose_print("Response: " + str(response.status_code) + ", " + str(response.reason))
         except:
-            raise (ALTAException("ERROR: deleting " +url+ "failed." + response.url))
+            raise (ALTAException("ERROR: " + str(response.status_code) + ", " + str(response.reason)))
 
 
-    def do_UPLOAD(self, key, id, filename, runid):
+    def do_UPLOAD(self, key, id, filename, directory, runid):
         """
         Do a http POST request to the alta backend (it will fail if the user does not have the proper rights)
         """
+
         # first upload the file..
         url = self.host + "upload/"
+
         files = {'file': open(filename, 'rb')}
         self.verbose_print("files: " + str(files))
-        payload = {'description': 'uploaded file by '+self.username, 'timestamp': str(datetime.now())}
+
+        # Add authorization to the request header
+        # warning: do not add content-type, requests will do that automatically because the 'files' keyword is used.
+        my_header = {}
+        my_header['authorization'] = ALTA_HEADER['authorization']
+        self.verbose_print('my_header: '+str(my_header))
+
+        payload = {}
+        payload['directory'] = directory
+        payload['description'] = 'uploaded file by '+self.username
+        payload['timestamp'] = str(datetime.now())
+
         self.verbose_print("payload: " + str(payload))
-        self.verbose_print("headers: " + str(self.header))
 
-        # response = requests.post(url, files=files, data=payload, headers=self.header)
-        # The request header
-        file_upload_header = ALTA_HEADER
-        file_upload_header['Content-Type'] = "multipart/form-data"
-        self.verbose_print('file_upload_header: '+str(file_upload_header))
-
-        response = requests.post(url, files=files, data=payload, headers=file_upload_header)
+        response = requests.post(url, files=files, data=payload, headers=my_header)
         self.verbose_print("[POST " + response.url + "]")
-
-        # Q: Response: 415, Unsupported Media Type
-        # A: If a client sends a request with a content-type that cannot be parsed then a UnsupportedMediaType exception will be raised, which by default will be caught and return a 415 Unsupported Media Type response
-        # Manually through http://localhost:8000/altapi/upload/ the Media type = multipart/form-data
-        # Content-Type: multipart/form-data;
-
         self.verbose_print("Response: " + str(response.status_code) + ", " + str(response.reason))
 
-        # ...then add the hyperlink to the indicated resource.field.
-
-        value = '???' # read the new url from the response? or what?
-
-        # upload the link to the uploaded file to the provided resource and field
-        # (usually activity.thumbnail or dataproduct.thumbnail)
+        file_url = '/alta-static'+response.json()['file']
+        # note that this will only upload the path without the host
+        # The host will be added by the backend based on the MY_STATIC_HOST in settings.py
+        # Preferably the 'alta-static/' part should also be defined in the ansible MY_STATIC_HOST,
+        # but I ran out of time.
 
         # split key in resource and field
         if key.find(':') > 0:
@@ -380,14 +385,12 @@ class ALTA:
 
         payload = {}
         if field != None:
-            payload[field] = value
+            payload[field] = file_url
             payload = self.encodePayload(payload)
-        try:
-            response = requests.request("PUT", url, data=payload, headers=self.header)
-            self.verbose_print("[PUT " + response.url + "]")
-            self.verbose_print("Response: " + str(response.status_code) + ", " + str(response.reason))
-        except:
-            raise (ALTAException("ERROR: " + response.url + " not found."))
+
+        response = requests.request("PUT", url, data=payload, headers=self.header)
+        self.verbose_print("[PUT " + response.url + "]")
+        self.verbose_print("Response: " + str(response.status_code) + ", " + str(response.reason))
 
 # ------------------------------------------------------------------------------#
 #                                Module level functions                         #
@@ -414,7 +417,8 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--value", default="", help="value to PUT in the resource.field. If omitted it will PUT the object without changing values, but the built-in 'signals' will be triggered.")
-    parser.add_argument("--filename", default="", help="experimental, do not use")
+    parser.add_argument("--filename", default="", help="local file to upload")
+    parser.add_argument("--directory", default="", help="remote directory to upload to (within the ALTA backend static media directory)")
     parser.add_argument("-r", "--runid", nargs="?", default=None, help="Optional runID which can be used instead of '--id' to lookup Observations or Pipelines.")
     parser.add_argument("-v","--verbose", default=False, help="More information at run time.",action="store_true")
     parser.add_argument("--host", nargs="?", default=DEFAULT_BACKEND_HOST, help= "Host url. Production = https://alta.astron.nl/altapi/, Acceptance = https://alta-acc.astron.nl/altapi/, Development (default) = http://localhost:8000/altapi/")
@@ -465,7 +469,7 @@ def main():
             print("> python alta_interface.py -o PUT --key observations:thumbnail --runid 180720003 --value http://alta.astron.nl/alta-static/media/WSRTA180223003_ALL_IMAGE.jpg --user vagrant --password vagrant -v")
             print()
             print("Upload a thumbnail to observation ")
-            print("> python alta_interface.py -o UPLOAD --key observations:thumbnail --runid 180720003 --filename WSRTA180223003_B018_IMAGE.jpg --user vagrant --password vagrant -v")
+            print("> python alta_interface.py -o UPLOAD --key observations:thumbnail --runid 180720003 --filename WSRTA180223003_B018_IMAGE.jpg --directory 180223003 --user vagrant --password vagrant -v")
 
             print('---------------------------------------------------------------------------------------------')
             return
@@ -491,7 +495,7 @@ def main():
 
         # doesn't work yet, I get a 415 error
         if (args.operation=='UPLOAD'):
-            alta.do_UPLOAD(key=args.key, id=args.id, filename=args.filename, runid=args.runid)
+            alta.do_UPLOAD(key=args.key, id=args.id, filename=args.filename, directory=args.directory, runid=args.runid)
 
     except ALTAException as exp:
         exit_with_error(exp.message)

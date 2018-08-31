@@ -93,4 +93,5 @@ class ObservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Observation
         fields = ('id','task_type', 'name', 'process_type','taskID','creationTime',
-                  'new_location','locations','my_locations','my_status','new_status','statusHistory','generatedDataProducts')
+                  'new_location','locations','my_locations','my_status','new_status','statusHistory',
+                  'generatedDataProducts','dps_count')
