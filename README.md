@@ -25,10 +25,17 @@ Datamodel
 State Diagram
 -
 <p align="center">
-<html>
-<div class="mxgraph" style="max-width:100%;border:1px solid transparent;" data-mxgraph="{&quot;highlight&quot;:&quot;#0000ff&quot;,&quot;nav&quot;:true,&quot;resize&quot;:true,&quot;toolbar&quot;:&quot;zoom layers lightbox&quot;,&quot;edit&quot;:&quot;https://www.draw.io/?state=%7B%22ids%22:%5B%221SgeP2OkQHnQpuMSSz9bCIy7vs3wZtmSN%22%5D,%22action%22:%22open%22,%22userId%22:%22105690784567598446807%22%7D#G1SgeP2OkQHnQpuMSSz9bCIy7vs3wZtmSN&quot;,&quot;url&quot;:&quot;https://drive.google.com/uc?id=1SgeP2OkQHnQpuMSSz9bCIy7vs3wZtmSN&amp;export=download&quot;}"></div>
-<script type="text/javascript" src="https://www.draw.io/embed2.js?&fetch=https%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1SgeP2OkQHnQpuMSSz9bCIy7vs3wZtmSN%26export%3Ddownload"></script>
-</html>
+<ul>
+<li><a href="https://drive.google.com/file/d/1SgeP2OkQHnQpuMSSz9bCIy7vs3wZtmSN/view?usp=sharing"/>Current State Diagram (maintained)</a></li>
+</ul>
+</p>
+
+Deployment Diagram (prototype)
+-
+<p align="center">
+<ul>
+<li><a href="https://drive.google.com/file/d/1hTisEgaWFAONj3dl7iT59HWQSSexTnDU/view?usp=sharing"/>Current Deployment Diagram (maintained)</a></li>
+</ul>
 </p>
 
 Documents
